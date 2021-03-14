@@ -1,22 +1,17 @@
 package graph
 
+// This file will be automatically regenerated based on the schema, any resolver implementations
+// will be copied through when generating and any unknown code will be moved to the end.
+
 import (
 	"context"
-	"fmt"
 
 	"github.com/makuzaverite/api/graph/generated"
 	"github.com/makuzaverite/api/graph/model"
 )
 
 func (r *queryResolver) GetUser(ctx context.Context) (*model.User, error) {
-	var user *model.User
-
-	user.FirstName = "Makuza"
-	user.LastName = "Mugabo"
-	user.Age = "18"
-	user.Email = "mugaboverite@gmail.com"
-
-	return &model.User{}, fmt.Errorf("No use found")
+	return &model.User{FirstName: "Makuza", LastName: "Mugabo Verite", Age: "18", Email: "mugaboverite@gmail.com"}, nil
 }
 
 // Query returns generated.QueryResolver implementation.
