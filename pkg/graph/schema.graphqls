@@ -13,7 +13,7 @@ type Query {
   names: Name!
   status: String!
   blogs: [Blog!]
-  socials: [Social!]
+  socials: [Social!]!
 }
 
 type Blog {
@@ -27,7 +27,7 @@ type Social {
 }
 
 type SkillsCategory {
-  skill: [Skill!]
+  skill: [Skill!]!
 }
 
 type Skill {

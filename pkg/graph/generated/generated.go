@@ -276,7 +276,7 @@ type Query {
   names: Name!
   status: String!
   blogs: [Blog!]
-  socials: [Social!]
+  socials: [Social!]!
 }
 
 type Blog {
@@ -290,7 +290,7 @@ type Social {
 }
 
 type SkillsCategory {
-  skill: [Skill!]
+  skill: [Skill!]!
 }
 
 type Skill {
@@ -696,11 +696,14 @@ func (ec *executionContext) _Query_socials(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.Social)
 	fc.Result = res
-	return ec.marshalOSocial2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocialᚄ(ctx, field.Selections, res)
+	return ec.marshalNSocial2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocialᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -904,11 +907,14 @@ func (ec *executionContext) _SkillsCategory_skill(ctx context.Context, field gra
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.Skill)
 	fc.Result = res
-	return ec.marshalOSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx, field.Selections, res)
+	return ec.marshalNSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Social_name(ctx context.Context, field graphql.CollectedField, obj *model.Social) (ret graphql.Marshaler) {
@@ -2213,6 +2219,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_socials(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "__type":
@@ -2280,6 +2289,9 @@ func (ec *executionContext) _SkillsCategory(ctx context.Context, sel ast.Selecti
 			out.Values[i] = graphql.MarshalString("SkillsCategory")
 		case "skill":
 			out.Values[i] = ec._SkillsCategory_skill(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2607,6 +2619,43 @@ func (ec *executionContext) marshalNName2ᚖgithubᚗcomᚋveritemᚋapiᚋpkg�
 	return ec._Name(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Skill) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSkill2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkill(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalNSkill2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkill(ctx context.Context, sel ast.SelectionSet, v *model.Skill) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -2615,6 +2664,43 @@ func (ec *executionContext) marshalNSkill2ᚖgithubᚗcomᚋveritemᚋapiᚋpkg�
 		return graphql.Null
 	}
 	return ec._Skill(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSocial2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocialᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Social) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSocial2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocial(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNSocial2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocial(ctx context.Context, sel ast.SelectionSet, v *model.Social) graphql.Marshaler {
@@ -2933,86 +3019,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
-}
-
-func (ec *executionContext) marshalOSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Skill) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSkill2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkill(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalOSocial2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocialᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Social) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSocial2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocial(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
