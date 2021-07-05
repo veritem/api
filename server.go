@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -36,12 +37,16 @@ func playgroundHandler() gin.HandlerFunc {
 func main() {
 
 	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 
-	err := godotenv.Load()
+	if os.Getenv("APP_ENV") != "production" {
+		err := godotenv.Load()
 
-	if err != nil {
-		log.Fatal("Error while loading .env")
+		if err != nil {
+			log.Fatal("Error while loading .env")
+		}
+
 	}
 
 	db.Connect()
