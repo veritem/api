@@ -1,13 +1,9 @@
 package main
 
 import (
-	"log"
-	"os"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/veritem/api/pkg/db"
 	"github.com/veritem/api/pkg/graph"
 	"github.com/veritem/api/pkg/graph/generated"
@@ -40,14 +36,14 @@ func main() {
 
 	router := gin.Default()
 
-	if os.Getenv("APP_ENV") != "production" {
-		err := godotenv.Load()
+	// if os.Getenv("APP_ENV") != "production" {
+	// 	err := godotenv.Load()
 
-		if err != nil {
-			log.Fatal("Error while loading .env")
-		}
+	// 	if err != nil {
+	// 		log.Fatal("Error while loading .env")
+	// 	}
 
-	}
+	// }
 
 	db.Connect()
 
