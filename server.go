@@ -34,6 +34,8 @@ func playgroundHandler() gin.HandlerFunc {
 }
 
 func main() {
+
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
 	err := godotenv.Load()
@@ -42,7 +44,7 @@ func main() {
 		log.Fatal("Error while loading .env")
 	}
 
-	db.InitDb()
+	db.Connect()
 
 	router.POST("/query", graphqlHandler())
 	router.GET("/", playgroundHandler())
