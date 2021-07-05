@@ -2,9 +2,29 @@
 
 package model
 
+type Blog struct {
+	Link          string `json:"link"`
+	DateOfRelease string `json:"dateOfRelease"`
+}
+
 type Name struct {
 	First    string `json:"first"`
 	Middle   string `json:"middle"`
 	Last     string `json:"last"`
 	Username string `json:"username"`
+}
+
+type Skill struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   string `json:"createdAt"`
+}
+
+type SkillsCategory struct {
+	Skill []*Skill `json:"skill"`
+}
+
+type Social struct {
+	Name    string `json:"name"`
+	Profile string `json:"profile"`
 }

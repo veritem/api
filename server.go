@@ -4,6 +4,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
+	"github.com/veritem/api/pkg/db"
 	"github.com/veritem/api/pkg/graph"
 	"github.com/veritem/api/pkg/graph/generated"
 )
@@ -31,6 +32,9 @@ func playgroundHandler() gin.HandlerFunc {
 
 func main() {
 	router := gin.Default()
+
+	db.InitDb()
+
 	router.POST("/query", graphqlHandler())
 	router.GET("/", playgroundHandler())
 	router.Run(defaultPort)

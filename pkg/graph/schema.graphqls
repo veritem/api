@@ -10,5 +10,28 @@ type Name {
 }
 
 type Query {
-  name: Name!
+  names: Name!
+  status: String!
+  blogs: [Blog!]
+  socials: [Social!]
+}
+
+type Blog {
+  link: String!
+  dateOfRelease: String!
+}
+
+type Social {
+  name: String!
+  profile: String!
+}
+
+type SkillsCategory {
+  skill: [Skill!]
+}
+
+type Skill {
+  name: String!
+  description: String!
+  createdAt: String!
 }
