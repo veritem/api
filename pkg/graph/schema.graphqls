@@ -14,11 +14,29 @@ type Query {
   status: String!
   blogs: [Blog!]
   socials: [Social!]!
+  skillsCategries: [SkillsCategory!]!
+  skills: [Skill!]!
 }
 
 type Blog {
   link: String!
   dateOfRelease: String!
+}
+
+type Mutation {
+  createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
+  createSkill(input: SkillInput!): Skill!
+}
+
+input SkillInput {
+  name: String!
+  description: String!
+  skillsCategoryID: String!
+}
+
+input SkillsCategoryInput {
+  name: String!
+  description: String!
 }
 
 type Social {
@@ -27,11 +45,17 @@ type Social {
 }
 
 type SkillsCategory {
-  skill: [Skill!]!
+  id: String!
+  name: String!
+  description: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Skill {
   name: String!
   description: String!
   createdAt: String!
+  skillsCategoryID: String!
+  updatedAt: String!
 }

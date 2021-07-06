@@ -35,6 +35,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -47,6 +48,11 @@ type ComplexityRoot struct {
 		Link          func(childComplexity int) int
 	}
 
+	Mutation struct {
+		CreateSkill         func(childComplexity int, input model.SkillInput) int
+		CreateSkillCategory func(childComplexity int, input model.SkillsCategoryInput) int
+	}
+
 	Name struct {
 		First    func(childComplexity int) int
 		Last     func(childComplexity int) int
@@ -55,20 +61,28 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Blogs   func(childComplexity int) int
-		Names   func(childComplexity int) int
-		Socials func(childComplexity int) int
-		Status  func(childComplexity int) int
+		Blogs           func(childComplexity int) int
+		Names           func(childComplexity int) int
+		Skills          func(childComplexity int) int
+		SkillsCategries func(childComplexity int) int
+		Socials         func(childComplexity int) int
+		Status          func(childComplexity int) int
 	}
 
 	Skill struct {
-		CreatedAt   func(childComplexity int) int
-		Description func(childComplexity int) int
-		Name        func(childComplexity int) int
+		CreatedAt        func(childComplexity int) int
+		Description      func(childComplexity int) int
+		Name             func(childComplexity int) int
+		SkillsCategoryID func(childComplexity int) int
+		UpdatedAt        func(childComplexity int) int
 	}
 
 	SkillsCategory struct {
-		Skill func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 	}
 
 	Social struct {
@@ -77,11 +91,17 @@ type ComplexityRoot struct {
 	}
 }
 
+type MutationResolver interface {
+	CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error)
+	CreateSkill(ctx context.Context, input model.SkillInput) (*model.Skill, error)
+}
 type QueryResolver interface {
 	Names(ctx context.Context) (*model.Name, error)
 	Status(ctx context.Context) (string, error)
 	Blogs(ctx context.Context) ([]*model.Blog, error)
 	Socials(ctx context.Context) ([]*model.Social, error)
+	SkillsCategries(ctx context.Context) ([]*model.SkillsCategory, error)
+	Skills(ctx context.Context) ([]*model.Skill, error)
 }
 
 type executableSchema struct {
@@ -112,6 +132,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Blog.Link(childComplexity), true
+
+	case "Mutation.createSkill":
+		if e.complexity.Mutation.CreateSkill == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSkill_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSkill(childComplexity, args["input"].(model.SkillInput)), true
+
+	case "Mutation.createSkillCategory":
+		if e.complexity.Mutation.CreateSkillCategory == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSkillCategory_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSkillCategory(childComplexity, args["input"].(model.SkillsCategoryInput)), true
 
 	case "Name.first":
 		if e.complexity.Name.First == nil {
@@ -155,6 +199,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Names(childComplexity), true
 
+	case "Query.skills":
+		if e.complexity.Query.Skills == nil {
+			break
+		}
+
+		return e.complexity.Query.Skills(childComplexity), true
+
+	case "Query.skillsCategries":
+		if e.complexity.Query.SkillsCategries == nil {
+			break
+		}
+
+		return e.complexity.Query.SkillsCategries(childComplexity), true
+
 	case "Query.socials":
 		if e.complexity.Query.Socials == nil {
 			break
@@ -190,12 +248,54 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Skill.Name(childComplexity), true
 
-	case "SkillsCategory.skill":
-		if e.complexity.SkillsCategory.Skill == nil {
+	case "Skill.skillsCategoryID":
+		if e.complexity.Skill.SkillsCategoryID == nil {
 			break
 		}
 
-		return e.complexity.SkillsCategory.Skill(childComplexity), true
+		return e.complexity.Skill.SkillsCategoryID(childComplexity), true
+
+	case "Skill.updatedAt":
+		if e.complexity.Skill.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Skill.UpdatedAt(childComplexity), true
+
+	case "SkillsCategory.createdAt":
+		if e.complexity.SkillsCategory.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.SkillsCategory.CreatedAt(childComplexity), true
+
+	case "SkillsCategory.description":
+		if e.complexity.SkillsCategory.Description == nil {
+			break
+		}
+
+		return e.complexity.SkillsCategory.Description(childComplexity), true
+
+	case "SkillsCategory.id":
+		if e.complexity.SkillsCategory.ID == nil {
+			break
+		}
+
+		return e.complexity.SkillsCategory.ID(childComplexity), true
+
+	case "SkillsCategory.name":
+		if e.complexity.SkillsCategory.Name == nil {
+			break
+		}
+
+		return e.complexity.SkillsCategory.Name(childComplexity), true
+
+	case "SkillsCategory.updatedAt":
+		if e.complexity.SkillsCategory.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.SkillsCategory.UpdatedAt(childComplexity), true
 
 	case "Social.name":
 		if e.complexity.Social.Name == nil {
@@ -228,6 +328,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -277,11 +391,29 @@ type Query {
   status: String!
   blogs: [Blog!]
   socials: [Social!]!
+  skillsCategries: [SkillsCategory!]!
+  skills: [Skill!]!
 }
 
 type Blog {
   link: String!
   dateOfRelease: String!
+}
+
+type Mutation {
+  createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
+  createSkill(input: SkillInput!): Skill!
+}
+
+input SkillInput {
+  name: String!
+  description: String!
+  skillsCategoryID: String!
+}
+
+input SkillsCategoryInput {
+  name: String!
+  description: String!
 }
 
 type Social {
@@ -290,13 +422,19 @@ type Social {
 }
 
 type SkillsCategory {
-  skill: [Skill!]!
+  id: String!
+  name: String!
+  description: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Skill {
   name: String!
   description: String!
   createdAt: String!
+  skillsCategoryID: String!
+  updatedAt: String!
 }
 `, BuiltIn: false},
 }
@@ -305,6 +443,36 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createSkillCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SkillsCategoryInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSkillsCategoryInput2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategoryInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createSkill_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SkillInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSkillInput2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -427,6 +595,90 @@ func (ec *executionContext) _Blog_dateOfRelease(ctx context.Context, field graph
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createSkillCategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createSkillCategory_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateSkillCategory(rctx, args["input"].(model.SkillsCategoryInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SkillsCategory)
+	fc.Result = res
+	return ec.marshalNSkillsCategory2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createSkill(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createSkill_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateSkill(rctx, args["input"].(model.SkillInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Skill)
+	fc.Result = res
+	return ec.marshalNSkill2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkill(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Name_first(ctx context.Context, field graphql.CollectedField, obj *model.Name) (ret graphql.Marshaler) {
@@ -706,6 +958,76 @@ func (ec *executionContext) _Query_socials(ctx context.Context, field graphql.Co
 	return ec.marshalNSocial2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocialᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_skillsCategries(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().SkillsCategries(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SkillsCategory)
+	fc.Result = res
+	return ec.marshalNSkillsCategory2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategoryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_skills(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Skills(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Skill)
+	fc.Result = res
+	return ec.marshalNSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -882,7 +1204,77 @@ func (ec *executionContext) _Skill_createdAt(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SkillsCategory_skill(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
+func (ec *executionContext) _Skill_skillsCategoryID(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Skill",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SkillsCategoryID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Skill_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Skill",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SkillsCategory_id(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -900,7 +1292,7 @@ func (ec *executionContext) _SkillsCategory_skill(ctx context.Context, field gra
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Skill, nil
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -912,9 +1304,149 @@ func (ec *executionContext) _SkillsCategory_skill(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Skill)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SkillsCategory_name(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SkillsCategory",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SkillsCategory_description(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SkillsCategory",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SkillsCategory_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SkillsCategory",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SkillsCategory_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SkillsCategory",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Social_name(ctx context.Context, field graphql.CollectedField, obj *model.Social) (ret graphql.Marshaler) {
@@ -2074,6 +2606,70 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputSkillInput(ctx context.Context, obj interface{}) (model.SkillInput, error) {
+	var it model.SkillInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "skillsCategoryID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("skillsCategoryID"))
+			it.SkillsCategoryID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSkillsCategoryInput(ctx context.Context, obj interface{}) (model.SkillsCategoryInput, error) {
+	var it model.SkillsCategoryInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2100,6 +2696,42 @@ func (ec *executionContext) _Blog(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "dateOfRelease":
 			out.Values[i] = ec._Blog_dateOfRelease(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createSkillCategory":
+			out.Values[i] = ec._Mutation_createSkillCategory(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createSkill":
+			out.Values[i] = ec._Mutation_createSkill(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2224,6 +2856,34 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "skillsCategries":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_skillsCategries(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "skills":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_skills(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -2265,6 +2925,16 @@ func (ec *executionContext) _Skill(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "skillsCategoryID":
+			out.Values[i] = ec._Skill_skillsCategoryID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Skill_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2287,8 +2957,28 @@ func (ec *executionContext) _SkillsCategory(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("SkillsCategory")
-		case "skill":
-			out.Values[i] = ec._SkillsCategory_skill(ctx, field, obj)
+		case "id":
+			out.Values[i] = ec._SkillsCategory_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._SkillsCategory_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._SkillsCategory_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._SkillsCategory_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._SkillsCategory_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2619,6 +3309,10 @@ func (ec *executionContext) marshalNName2ᚖgithubᚗcomᚋveritemᚋapiᚋpkg�
 	return ec._Name(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNSkill2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkill(ctx context.Context, sel ast.SelectionSet, v model.Skill) graphql.Marshaler {
+	return ec._Skill(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Skill) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -2664,6 +3358,67 @@ func (ec *executionContext) marshalNSkill2ᚖgithubᚗcomᚋveritemᚋapiᚋpkg�
 		return graphql.Null
 	}
 	return ec._Skill(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSkillInput2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillInput(ctx context.Context, v interface{}) (model.SkillInput, error) {
+	res, err := ec.unmarshalInputSkillInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSkillsCategory2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategory(ctx context.Context, sel ast.SelectionSet, v model.SkillsCategory) graphql.Marshaler {
+	return ec._SkillsCategory(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSkillsCategory2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SkillsCategory) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSkillsCategory2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategory(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNSkillsCategory2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategory(ctx context.Context, sel ast.SelectionSet, v *model.SkillsCategory) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SkillsCategory(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSkillsCategoryInput2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategoryInput(ctx context.Context, v interface{}) (model.SkillsCategoryInput, error) {
+	res, err := ec.unmarshalInputSkillsCategoryInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNSocial2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocialᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Social) graphql.Marshaler {

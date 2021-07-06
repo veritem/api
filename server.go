@@ -4,6 +4,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
+	"github.com/subosito/gotenv"
 	"github.com/veritem/api/pkg/db"
 	"github.com/veritem/api/pkg/graph"
 	"github.com/veritem/api/pkg/graph/generated"
@@ -32,18 +33,11 @@ func playgroundHandler() gin.HandlerFunc {
 
 func main() {
 
+	gotenv.Load()
+
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
-
-	// if os.Getenv("APP_ENV") != "production" {
-	// 	err := godotenv.Load()
-
-	// 	if err != nil {
-	// 		log.Fatal("Error while loading .env")
-	// 	}
-
-	// }
 
 	db.Connect()
 

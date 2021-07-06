@@ -15,13 +15,30 @@ type Name struct {
 }
 
 type Skill struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatedAt   string `json:"createdAt"`
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	CreatedAt        string `json:"createdAt"`
+	SkillsCategoryID string `json:"skillsCategoryID"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
+type SkillInput struct {
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	SkillsCategoryID string `json:"skillsCategoryID"`
 }
 
 type SkillsCategory struct {
-	Skill []*Skill `json:"skill"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type SkillsCategoryInput struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type Social struct {
