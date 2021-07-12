@@ -15,21 +15,28 @@ import (
 )
 
 func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error) {
-	skillsCat := &model.SkillsCategory{
+
+	skillsCat := db.SkillsCategory{
 		Name:        input.Name,
 		Description: input.Description,
-		CreatedAt:   time.Now().Format(time.RFC3339),
-		UpdatedAt:   time.Now().Format(time.RFC3339),
 	}
 
 	result := db.DB.Create(&skillsCat)
 
 	if result.Error != nil {
 		fmt.Println("Failed to create skill" + result.Error.Error())
-		return nil, gqlerror.Errorf("Failed to create skill")
+		return nil, gqlerror.Errorf("Failed to create skill " + result.Error.Error())
 	}
 
-	return skillsCat, nil
+	response := &model.SkillsCategory{
+		ID:          fmt.Sprint(skillsCat.ID),
+		CreatedAt:   skillsCat.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   skillsCat.UpdatedAt.Format(time.RFC3339),
+		Name:        skillsCat.Name,
+		Description: skillsCat.Description,
+	}
+
+	return response, nil
 }
 
 func (r *mutationResolver) CreateSkill(ctx context.Context, input model.SkillInput) (*model.Skill, error) {
@@ -45,6 +52,10 @@ func (r *mutationResolver) CreateSkill(ctx context.Context, input model.SkillInp
 		fmt.Println("Failed create skill")
 	}
 	return skill, nil
+}
+
+func (r *mutationResolver) GenerateSecret(ctx context.Context, input model.ScretInput) (*model.Secret, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Names(ctx context.Context) (*model.Name, error) {
@@ -64,6 +75,7 @@ func (r *queryResolver) Socials(ctx context.Context) ([]*model.Social, error) {
 }
 
 func (r *queryResolver) SkillsCategries(ctx context.Context) ([]*model.SkillsCategory, error) {
+
 	var categories []*model.SkillsCategory
 	result := db.DB.Statement.Find(&categories)
 

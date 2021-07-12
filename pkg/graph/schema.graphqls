@@ -26,6 +26,12 @@ type Blog {
 type Mutation {
   createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
   createSkill(input: SkillInput!): Skill!
+  generateSecret(input: ScretInput!): Secret!
+}
+
+input ScretInput {
+  role: Role!
+  expiresIn: String
 }
 
 input SkillInput {
@@ -58,4 +64,19 @@ type Skill {
   createdAt: String!
   skillsCategoryID: String!
   updatedAt: String!
+}
+
+type Secret {
+  id: ID!
+  role: Role!
+  token: String!
+  expiresIn: String!
+  createdAt: String!
+  UpdatedAt: String!
+}
+
+enum Role {
+  GUEST
+  MENTAINER
+  ADMIN
 }

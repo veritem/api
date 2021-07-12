@@ -36,7 +36,7 @@ func Connect() error {
 		return err
 	}
 
-	err = db.AutoMigrate(&Skill{})
+	err = db.AutoMigrate(&Skill{}, &Secret{}, &SkillsCategory{})
 
 	if err != nil {
 		return err
