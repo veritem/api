@@ -5,5 +5,4 @@ type Skill struct {
 	Name             string
 	Description      string
 	SkillsCategoryID uint
-	SkillsCategory   SkillsCategory
 }

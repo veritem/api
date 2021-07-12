@@ -80,11 +80,12 @@ type ComplexityRoot struct {
 	}
 
 	Skill struct {
-		CreatedAt        func(childComplexity int) int
-		Description      func(childComplexity int) int
-		Name             func(childComplexity int) int
-		SkillsCategoryID func(childComplexity int) int
-		UpdatedAt        func(childComplexity int) int
+		Category    func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 	}
 
 	SkillsCategory struct {
@@ -292,6 +293,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Secret.UpdatedAt(childComplexity), true
 
+	case "Skill.category":
+		if e.complexity.Skill.Category == nil {
+			break
+		}
+
+		return e.complexity.Skill.Category(childComplexity), true
+
 	case "Skill.createdAt":
 		if e.complexity.Skill.CreatedAt == nil {
 			break
@@ -306,19 +314,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Skill.Description(childComplexity), true
 
+	case "Skill.id":
+		if e.complexity.Skill.ID == nil {
+			break
+		}
+
+		return e.complexity.Skill.ID(childComplexity), true
+
 	case "Skill.name":
 		if e.complexity.Skill.Name == nil {
 			break
 		}
 
 		return e.complexity.Skill.Name(childComplexity), true
-
-	case "Skill.skillsCategoryID":
-		if e.complexity.Skill.SkillsCategoryID == nil {
-			break
-		}
-
-		return e.complexity.Skill.SkillsCategoryID(childComplexity), true
 
 	case "Skill.updatedAt":
 		if e.complexity.Skill.UpdatedAt == nil {
@@ -440,7 +448,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "pkg/graph/schema.graphqls", Input: `# GraphQL schema example
+	{Name: "pkg/graph/schema.graphql", Input: `# GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
 
@@ -493,7 +501,7 @@ type Social {
 }
 
 type SkillsCategory {
-  id: String!
+  id: ID!
   name: String!
   description: String!
   createdAt: String!
@@ -501,10 +509,11 @@ type SkillsCategory {
 }
 
 type Skill {
+  id: ID!
   name: String!
   description: String!
   createdAt: String!
-  skillsCategoryID: String!
+  category: SkillsCategory!
   updatedAt: String!
 }
 
@@ -1452,6 +1461,41 @@ func (ec *executionContext) _Secret_UpdatedAt(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Skill_id(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Skill",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Skill_name(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1557,7 +1601,7 @@ func (ec *executionContext) _Skill_createdAt(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Skill_skillsCategoryID(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
+func (ec *executionContext) _Skill_category(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1575,7 +1619,7 @@ func (ec *executionContext) _Skill_skillsCategoryID(ctx context.Context, field g
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.SkillsCategoryID, nil
+		return obj.Category, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1587,9 +1631,9 @@ func (ec *executionContext) _Skill_skillsCategoryID(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.SkillsCategory)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNSkillsCategory2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategory(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Skill_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
@@ -1659,7 +1703,7 @@ func (ec *executionContext) _SkillsCategory_id(ctx context.Context, field graphq
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SkillsCategory_name(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
@@ -3348,6 +3392,11 @@ func (ec *executionContext) _Skill(ctx context.Context, sel ast.SelectionSet, ob
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Skill")
+		case "id":
+			out.Values[i] = ec._Skill_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "name":
 			out.Values[i] = ec._Skill_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3363,8 +3412,8 @@ func (ec *executionContext) _Skill(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "skillsCategoryID":
-			out.Values[i] = ec._Skill_skillsCategoryID(ctx, field, obj)
+		case "category":
+			out.Values[i] = ec._Skill_category(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

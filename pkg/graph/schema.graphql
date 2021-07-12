@@ -51,7 +51,7 @@ type Social {
 }
 
 type SkillsCategory {
-  id: String!
+  id: ID!
   name: String!
   description: String!
   createdAt: String!
@@ -59,10 +59,11 @@ type SkillsCategory {
 }
 
 type Skill {
+  id: ID!
   name: String!
   description: String!
   createdAt: String!
-  skillsCategoryID: String!
+  category: SkillsCategory!
   updatedAt: String!
 }
 

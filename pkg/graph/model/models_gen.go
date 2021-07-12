@@ -35,11 +35,12 @@ type Secret struct {
 }
 
 type Skill struct {
-	Name             string `json:"name"`
-	Description      string `json:"description"`
-	CreatedAt        string `json:"createdAt"`
-	SkillsCategoryID string `json:"skillsCategoryID"`
-	UpdatedAt        string `json:"updatedAt"`
+	ID          string          `json:"id"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	CreatedAt   string          `json:"createdAt"`
+	Category    *SkillsCategory `json:"category"`
+	UpdatedAt   string          `json:"updatedAt"`
 }
 
 type SkillInput struct {
