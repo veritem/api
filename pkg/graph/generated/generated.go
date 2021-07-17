@@ -44,8 +44,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Blog struct {
-		DateOfRelease func(childComplexity int) int
-		Link          func(childComplexity int) int
+		ID         func(childComplexity int) int
+		LastUpdate func(childComplexity int) int
+		Title      func(childComplexity int) int
+		URL        func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -131,19 +133,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Blog.dateOfRelease":
-		if e.complexity.Blog.DateOfRelease == nil {
+	case "Blog.id":
+		if e.complexity.Blog.ID == nil {
 			break
 		}
 
-		return e.complexity.Blog.DateOfRelease(childComplexity), true
+		return e.complexity.Blog.ID(childComplexity), true
 
-	case "Blog.link":
-		if e.complexity.Blog.Link == nil {
+	case "Blog.lastUpdate":
+		if e.complexity.Blog.LastUpdate == nil {
 			break
 		}
 
-		return e.complexity.Blog.Link(childComplexity), true
+		return e.complexity.Blog.LastUpdate(childComplexity), true
+
+	case "Blog.title":
+		if e.complexity.Blog.Title == nil {
+			break
+		}
+
+		return e.complexity.Blog.Title(childComplexity), true
+
+	case "Blog.url":
+		if e.complexity.Blog.URL == nil {
+			break
+		}
+
+		return e.complexity.Blog.URL(childComplexity), true
 
 	case "Mutation.createSkill":
 		if e.complexity.Mutation.CreateSkill == nil {
@@ -469,8 +485,10 @@ type Query {
 }
 
 type Blog {
-  link: String!
-  dateOfRelease: String!
+  id: ID!
+  title: String!
+  url: String!
+  lastUpdate: String!
 }
 
 type Mutation {
@@ -637,7 +655,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Blog_link(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
+func (ec *executionContext) _Blog_id(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -655,7 +673,42 @@ func (ec *executionContext) _Blog_link(ctx context.Context, field graphql.Collec
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Link, nil
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Blog_title(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Blog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -672,7 +725,7 @@ func (ec *executionContext) _Blog_link(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Blog_dateOfRelease(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
+func (ec *executionContext) _Blog_url(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -690,7 +743,42 @@ func (ec *executionContext) _Blog_dateOfRelease(ctx context.Context, field graph
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DateOfRelease, nil
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Blog_lastUpdate(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Blog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LastUpdate, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3114,13 +3202,23 @@ func (ec *executionContext) _Blog(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Blog")
-		case "link":
-			out.Values[i] = ec._Blog_link(ctx, field, obj)
+		case "id":
+			out.Values[i] = ec._Blog_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "dateOfRelease":
-			out.Values[i] = ec._Blog_dateOfRelease(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._Blog_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "url":
+			out.Values[i] = ec._Blog_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "lastUpdate":
+			out.Values[i] = ec._Blog_lastUpdate(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

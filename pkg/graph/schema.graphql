@@ -19,8 +19,10 @@ type Query {
 }
 
 type Blog {
-  link: String!
-  dateOfRelease: String!
+  id: ID!
+  title: String!
+  url: String!
+  lastUpdated: String!
 }
 
 type Mutation {

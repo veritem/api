@@ -9,8 +9,10 @@ import (
 )
 
 type Blog struct {
-	Link          string `json:"link"`
-	DateOfRelease string `json:"dateOfRelease"`
+	ID         string `json:"id"`
+	Title      string `json:"title"`
+	URL        string `json:"url"`
+	LastUpdate string `json:"lastUpdate"`
 }
 
 type Name struct {
