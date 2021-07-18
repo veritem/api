@@ -8,7 +8,8 @@ on:
 
 jobs:
 
-  build:
+  ci:
+    name: build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -23,3 +24,29 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+  
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
+      - name: Format
+        run: test -z "$(gofmt -l .)"
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install libgit2
+        run: sudo apt-get update && sudo apt-get install -y libgit2-dev
+
+      - name: Run Golangci Linter
+        uses: golangci/golangci-lint-action@v2.3.0
