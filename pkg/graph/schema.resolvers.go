@@ -1,13 +1,8 @@
 package graph
 
-// This file will be automatically regenerated based on the schema, any resolver implementations
-// will be copied through when generating and any unknown code will be moved to the end.
-
 import (
 	"context"
 	"fmt"
-	"log"
-	"strconv"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -15,6 +10,15 @@ import (
 	"github.com/veritem/api/pkg/graph/generated"
 	"github.com/veritem/api/pkg/graph/model"
 )
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error) {
 	skillsCat := db.SkillsCategory{
@@ -40,17 +44,9 @@ func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.
 }
 
 func (r *mutationResolver) CreateSkill(ctx context.Context, input model.SkillInput) (*model.Skill, error) {
-	skillCatId, err := strconv.ParseUint(input.SkillsCategoryID, 10, 64)
-
-	if err != nil {
-		return nil, gqlerror.Errorf("Failed to parse skillscategry id")
-	}
-
 	var skillCategory db.SkillsCategory
 
-	db.DB.Where("id = ? ", skillCatId).First(&skillCategory)
-
-	log.Println(skillCategory)
+	db.DB.Where("id = ? ", input.SkillsCategoryID).First(&skillCategory)
 
 	if skillCategory.Name == "" {
 		return nil, gqlerror.Errorf("Skill category not found!")
@@ -59,28 +55,21 @@ func (r *mutationResolver) CreateSkill(ctx context.Context, input model.SkillInp
 	skill := db.Skill{
 		Name:             input.Name,
 		Description:      input.Description,
-		SkillsCategoryID: uint(skillCatId),
+		SkillsCategoryID: input.SkillsCategoryID,
 	}
 
-	result := db.DB.Create(&skill)
+	result := db.DB.Omit("skills_and_category.*").Create(&skill)
 
 	if result.Error != nil {
 		fmt.Println("Failed create skill")
 	}
-	skill_category := &model.SkillsCategory{
-		ID:          fmt.Sprint(skillCategory.ID),
-		CreatedAt:   skillCategory.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   skillCategory.UpdatedAt.Format(time.RFC3339),
-		Name:        skillCategory.Name,
-		Description: skillCategory.Description,
-	}
+
 	response := &model.Skill{
 		ID:          fmt.Sprint(skill.ID),
 		Name:        skill.Name,
 		Description: skill.Description,
 		CreatedAt:   skill.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:   skill.UpdatedAt.Format(time.RFC3339),
-		Category:    skill_category,
 	}
 
 	return response, nil
@@ -107,31 +96,48 @@ func (r *queryResolver) Socials(ctx context.Context) ([]*model.Social, error) {
 }
 
 func (r *queryResolver) SkillsCategries(ctx context.Context) ([]*model.SkillsCategory, error) {
-	var categories []*model.SkillsCategory
-	result := db.DB.Statement.Find(&categories)
+	var categories []db.SkillsCategory
 
-	if result.Error != nil {
-		return nil, gqlerror.Errorf("Failed to get categories!" + result.Error.Error())
+	result := db.DB.Model(&db.Skill{}).Association("SkillsCategoryID").Find(&categories)
+
+	if result.Error() != "" {
+		return nil, gqlerror.Errorf("Failed to get categories! " + result.Error())
 	}
 
-	return categories, nil
+	response := make([]*model.SkillsCategory, 0, len([]model.SkillsCategory{}))
+
+	for i, skillCategory := range categories {
+		response[i] = &model.SkillsCategory{
+			ID:          fmt.Sprint(skillCategory.ID),
+			Name:        skillCategory.Name,
+			Description: skillCategory.Description,
+			CreatedAt:   skillCategory.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   skillCategory.UpdatedAt.Format(time.RFC3339),
+		}
+	}
+
+	return response, nil
 }
 
 func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
-	var skills []*model.Skill
+	var skills []db.Skill
 	result := db.DB.Find(&skills)
 
 	if result.Error != nil {
 		return nil, gqlerror.Errorf("Failed to get skills!" + result.Error.Error())
 	}
-	return skills, nil
+
+	response := make([]*model.Skill, 0, len([]*model.Skill{}))
+
+	for _, skill := range skills {
+		response = append(response, &model.Skill{
+			ID:          fmt.Sprint(skill.ID),
+			Name:        skill.Name,
+			Description: skill.Description,
+			CreatedAt:   skill.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   skill.UpdatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return response, nil
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -14,9 +15,14 @@ import (
 var DB *gorm.DB
 
 type Model struct {
-	ID        uint `gorm:"primarykey"`
+	ID        string `gorm:"primarykey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+func (model *Model) BeforeCreate(tx *gorm.DB) (err error) {
+	model.ID = uuid.NewString()
+	return
 }
 
 func Connect() error {
@@ -36,7 +42,7 @@ func Connect() error {
 		return err
 	}
 
-	err = db.AutoMigrate(&Skill{}, &Secret{}, &SkillsCategory{})
+	err = db.AutoMigrate(&SkillsCategory{}, Skill{}, &Secret{})
 
 	if err != nil {
 		return err

@@ -4,5 +4,5 @@ type Skill struct {
 	Model
 	Name             string
 	Description      string
-	SkillsCategoryID uint
+	SkillsCategoryID string
 }

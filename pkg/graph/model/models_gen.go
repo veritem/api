@@ -9,10 +9,10 @@ import (
 )
 
 type Blog struct {
-	ID         string `json:"id"`
-	Title      string `json:"title"`
-	URL        string `json:"url"`
-	LastUpdate string `json:"lastUpdate"`
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	LastUpdated string `json:"lastUpdated"`
 }
 
 type Name struct {
@@ -37,12 +37,11 @@ type Secret struct {
 }
 
 type Skill struct {
-	ID          string          `json:"id"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	CreatedAt   string          `json:"createdAt"`
-	Category    *SkillsCategory `json:"category"`
-	UpdatedAt   string          `json:"updatedAt"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 type SkillInput struct {
@@ -52,11 +51,12 @@ type SkillInput struct {
 }
 
 type SkillsCategory struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	CreatedAt   string   `json:"createdAt"`
+	UpdatedAt   string   `json:"updatedAt"`
+	Skills      []*Skill `json:"skills"`
 }
 
 type SkillsCategoryInput struct {
@@ -65,6 +65,7 @@ type SkillsCategoryInput struct {
 }
 
 type Social struct {
+	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Profile string `json:"profile"`
 }

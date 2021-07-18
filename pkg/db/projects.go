@@ -4,6 +4,6 @@ type Project struct {
 	Model
 	Name        string
 	Description string
-	GithubUrl   string
-	ProjectUrl  string
+	GithubURL   string
+	ProjectURL  string
 }

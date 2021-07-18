@@ -1,7 +1,3 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
 type Name {
   first: String!
   middle: String!
@@ -9,26 +5,11 @@ type Name {
   username: String!
 }
 
-type Query {
-  names: Name!
-  status: String!
-  blogs: [Blog!]
-  socials: [Social!]!
-  skillsCategries: [SkillsCategory!]!
-  skills: [Skill!]!
-}
-
 type Blog {
   id: ID!
   title: String!
   url: String!
   lastUpdated: String!
-}
-
-type Mutation {
-  createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
-  createSkill(input: SkillInput!): Skill!
-  generateSecret(input: ScretInput!): Secret!
 }
 
 input ScretInput {
@@ -48,6 +29,7 @@ input SkillsCategoryInput {
 }
 
 type Social {
+  id: ID!
   name: String!
   profile: String!
 }
@@ -58,6 +40,7 @@ type SkillsCategory {
   description: String!
   createdAt: String!
   updatedAt: String!
+  skills: [Skill!]!
 }
 
 type Skill {
@@ -65,7 +48,6 @@ type Skill {
   name: String!
   description: String!
   createdAt: String!
-  category: SkillsCategory!
   updatedAt: String!
 }
 
@@ -82,4 +64,19 @@ enum Role {
   GUEST
   MENTAINER
   ADMIN
+}
+
+type Mutation {
+  createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
+  createSkill(input: SkillInput!): Skill!
+  generateSecret(input: ScretInput!): Secret!
+}
+
+type Query {
+  names: Name!
+  status: String!
+  blogs: [Blog!]
+  socials: [Social!]!
+  skillsCategries: [SkillsCategory!]!
+  skills: [Skill!]!
 }

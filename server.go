@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
@@ -14,7 +16,6 @@ const defaultPort = ":8080"
 
 // graphql handler
 func graphqlHandler() gin.HandlerFunc {
-
 	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
 	return func(c *gin.Context) {
@@ -32,16 +33,24 @@ func playgroundHandler() gin.HandlerFunc {
 }
 
 func main() {
-
-	gotenv.Load()
+	gotenv.Load() //nolint:errcheck,gocritic,nolintlint
 
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
 
-	db.Connect()
+	err := db.Connect()
+
+	if err != nil {
+		log.Println(err)
+	}
 
 	router.POST("/query", graphqlHandler())
 	router.GET("/", playgroundHandler())
-	router.Run(defaultPort)
+
+	err = router.Run(defaultPort)
+
+	if err != nil {
+		log.Println(err)
+	}
 }

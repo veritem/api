@@ -44,10 +44,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Blog struct {
-		ID         func(childComplexity int) int
-		LastUpdate func(childComplexity int) int
-		Title      func(childComplexity int) int
-		URL        func(childComplexity int) int
+		ID          func(childComplexity int) int
+		LastUpdated func(childComplexity int) int
+		Title       func(childComplexity int) int
+		URL         func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -82,7 +82,6 @@ type ComplexityRoot struct {
 	}
 
 	Skill struct {
-		Category    func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -95,10 +94,12 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
+		Skills      func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
 	}
 
 	Social struct {
+		ID      func(childComplexity int) int
 		Name    func(childComplexity int) int
 		Profile func(childComplexity int) int
 	}
@@ -140,12 +141,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Blog.ID(childComplexity), true
 
-	case "Blog.lastUpdate":
-		if e.complexity.Blog.LastUpdate == nil {
+	case "Blog.lastUpdated":
+		if e.complexity.Blog.LastUpdated == nil {
 			break
 		}
 
-		return e.complexity.Blog.LastUpdate(childComplexity), true
+		return e.complexity.Blog.LastUpdated(childComplexity), true
 
 	case "Blog.title":
 		if e.complexity.Blog.Title == nil {
@@ -309,13 +310,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Secret.UpdatedAt(childComplexity), true
 
-	case "Skill.category":
-		if e.complexity.Skill.Category == nil {
-			break
-		}
-
-		return e.complexity.Skill.Category(childComplexity), true
-
 	case "Skill.createdAt":
 		if e.complexity.Skill.CreatedAt == nil {
 			break
@@ -379,12 +373,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SkillsCategory.Name(childComplexity), true
 
+	case "SkillsCategory.skills":
+		if e.complexity.SkillsCategory.Skills == nil {
+			break
+		}
+
+		return e.complexity.SkillsCategory.Skills(childComplexity), true
+
 	case "SkillsCategory.updatedAt":
 		if e.complexity.SkillsCategory.UpdatedAt == nil {
 			break
 		}
 
 		return e.complexity.SkillsCategory.UpdatedAt(childComplexity), true
+
+	case "Social.id":
+		if e.complexity.Social.ID == nil {
+			break
+		}
+
+		return e.complexity.Social.ID(childComplexity), true
 
 	case "Social.name":
 		if e.complexity.Social.Name == nil {
@@ -464,37 +472,18 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "pkg/graph/schema.graphql", Input: `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type Name {
+	{Name: "pkg/graph/schema.graphql", Input: `type Name {
   first: String!
   middle: String!
   last: String!
   username: String!
 }
 
-type Query {
-  names: Name!
-  status: String!
-  blogs: [Blog!]
-  socials: [Social!]!
-  skillsCategries: [SkillsCategory!]!
-  skills: [Skill!]!
-}
-
 type Blog {
   id: ID!
   title: String!
   url: String!
-  lastUpdate: String!
-}
-
-type Mutation {
-  createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
-  createSkill(input: SkillInput!): Skill!
-  generateSecret(input: ScretInput!): Secret!
+  lastUpdated: String!
 }
 
 input ScretInput {
@@ -514,6 +503,7 @@ input SkillsCategoryInput {
 }
 
 type Social {
+  id: ID!
   name: String!
   profile: String!
 }
@@ -524,6 +514,7 @@ type SkillsCategory {
   description: String!
   createdAt: String!
   updatedAt: String!
+  skills: [Skill!]!
 }
 
 type Skill {
@@ -531,7 +522,6 @@ type Skill {
   name: String!
   description: String!
   createdAt: String!
-  category: SkillsCategory!
   updatedAt: String!
 }
 
@@ -548,6 +538,21 @@ enum Role {
   GUEST
   MENTAINER
   ADMIN
+}
+
+type Mutation {
+  createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
+  createSkill(input: SkillInput!): Skill!
+  generateSecret(input: ScretInput!): Secret!
+}
+
+type Query {
+  names: Name!
+  status: String!
+  blogs: [Blog!]
+  socials: [Social!]!
+  skillsCategries: [SkillsCategory!]!
+  skills: [Skill!]!
 }
 `, BuiltIn: false},
 }
@@ -760,7 +765,7 @@ func (ec *executionContext) _Blog_url(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Blog_lastUpdate(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
+func (ec *executionContext) _Blog_lastUpdated(ctx context.Context, field graphql.CollectedField, obj *model.Blog) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -778,7 +783,7 @@ func (ec *executionContext) _Blog_lastUpdate(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.LastUpdate, nil
+		return obj.LastUpdated, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1689,41 +1694,6 @@ func (ec *executionContext) _Skill_createdAt(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Skill_category(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Skill",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Category, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.SkillsCategory)
-	fc.Result = res
-	return ec.marshalNSkillsCategory2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillsCategory(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Skill_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Skill) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1932,6 +1902,76 @@ func (ec *executionContext) _SkillsCategory_updatedAt(ctx context.Context, field
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SkillsCategory_skills(ctx context.Context, field graphql.CollectedField, obj *model.SkillsCategory) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SkillsCategory",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Skills, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Skill)
+	fc.Result = res
+	return ec.marshalNSkill2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSkillᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Social_id(ctx context.Context, field graphql.CollectedField, obj *model.Social) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Social",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Social_name(ctx context.Context, field graphql.CollectedField, obj *model.Social) (ret graphql.Marshaler) {
@@ -3217,8 +3257,8 @@ func (ec *executionContext) _Blog(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "lastUpdate":
-			out.Values[i] = ec._Blog_lastUpdate(ctx, field, obj)
+		case "lastUpdated":
+			out.Values[i] = ec._Blog_lastUpdated(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3510,11 +3550,6 @@ func (ec *executionContext) _Skill(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "category":
-			out.Values[i] = ec._Skill_category(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "updatedAt":
 			out.Values[i] = ec._Skill_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3567,6 +3602,11 @@ func (ec *executionContext) _SkillsCategory(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "skills":
+			out.Values[i] = ec._SkillsCategory_skills(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3589,6 +3629,11 @@ func (ec *executionContext) _Social(ctx context.Context, sel ast.SelectionSet, o
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Social")
+		case "id":
+			out.Values[i] = ec._Social_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "name":
 			out.Values[i] = ec._Social_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
