@@ -12,7 +12,17 @@ import (
 	"github.com/veritem/api/pkg/db"
 	"github.com/veritem/api/pkg/graph/generated"
 	"github.com/veritem/api/pkg/graph/model"
+	"github.com/veritem/api/pkg/utils"
 )
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error) {
 	skillsCat := db.SkillsCategory{
@@ -28,8 +38,8 @@ func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.
 
 	response := &model.SkillsCategory{
 		ID:          fmt.Sprint(skillsCat.ID),
-		CreatedAt:   skillsCat.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:   skillsCat.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:   utils.FormatTime(skillsCat.CreatedAt),
+		UpdatedAt:   utils.FormatTime(skillsCat.UpdatedAt),
 		Name:        skillsCat.Name,
 		Description: skillsCat.Description,
 	}
@@ -96,7 +106,7 @@ func (r *queryResolver) SkillsCategories(ctx context.Context) ([]*model.SkillsCa
 	result := db.DB.Preload("Skills").Find(&categories)
 
 	if result.Error != nil {
-		return nil, gqlerror.Errorf("Failed to get categories: ", result.Error)
+		return nil, gqlerror.Errorf("Failed to get categories: " + result.Error.Error())
 	}
 
 	response := make([]*model.SkillsCategory, 0)
@@ -106,8 +116,8 @@ func (r *queryResolver) SkillsCategories(ctx context.Context) ([]*model.SkillsCa
 			ID:          fmt.Sprint(skillCategory.ID),
 			Name:        skillCategory.Name,
 			Description: skillCategory.Description,
-			CreatedAt:   skillCategory.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   skillCategory.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:   utils.FormatTime(skillCategory.CreatedAt),
+			UpdatedAt:   utils.FormatTime(skillCategory.UpdatedAt),
 			Skills:      convertSkills(skillCategory.Skills),
 		})
 	}
@@ -124,8 +134,8 @@ func convertSkills(skills []db.Skill) []*model.Skill {
 			ID:          item.ID,
 			Name:        item.Name,
 			Description: item.Description,
-			CreatedAt:   item.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:   utils.FormatTime(item.CreatedAt),
+			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
 		})
 	}
 	return skillsModels
@@ -133,6 +143,7 @@ func convertSkills(skills []db.Skill) []*model.Skill {
 
 func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 	var skills []db.Skill
+
 	result := db.DB.Find(&skills)
 
 	if result.Error != nil {
@@ -153,12 +164,3 @@ func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 
 	return response, nil
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
