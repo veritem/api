@@ -77,6 +77,6 @@ type Query {
   status: String!
   blogs: [Blog!]
   socials: [Social!]!
-  skillsCategries: [SkillsCategory!]!
+  skillsCategories: [SkillsCategory!]!
   skills: [Skill!]!
 }

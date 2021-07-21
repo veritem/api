@@ -64,12 +64,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Blogs           func(childComplexity int) int
-		Names           func(childComplexity int) int
-		Skills          func(childComplexity int) int
-		SkillsCategries func(childComplexity int) int
-		Socials         func(childComplexity int) int
-		Status          func(childComplexity int) int
+		Blogs            func(childComplexity int) int
+		Names            func(childComplexity int) int
+		Skills           func(childComplexity int) int
+		SkillsCategories func(childComplexity int) int
+		Socials          func(childComplexity int) int
+		Status           func(childComplexity int) int
 	}
 
 	Secret struct {
@@ -115,7 +115,7 @@ type QueryResolver interface {
 	Status(ctx context.Context) (string, error)
 	Blogs(ctx context.Context) ([]*model.Blog, error)
 	Socials(ctx context.Context) ([]*model.Social, error)
-	SkillsCategries(ctx context.Context) ([]*model.SkillsCategory, error)
+	SkillsCategories(ctx context.Context) ([]*model.SkillsCategory, error)
 	Skills(ctx context.Context) ([]*model.Skill, error)
 }
 
@@ -247,12 +247,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Skills(childComplexity), true
 
-	case "Query.skillsCategries":
-		if e.complexity.Query.SkillsCategries == nil {
+	case "Query.skillsCategories":
+		if e.complexity.Query.SkillsCategories == nil {
 			break
 		}
 
-		return e.complexity.Query.SkillsCategries(childComplexity), true
+		return e.complexity.Query.SkillsCategories(childComplexity), true
 
 	case "Query.socials":
 		if e.complexity.Query.Socials == nil {
@@ -551,7 +551,7 @@ type Query {
   status: String!
   blogs: [Blog!]
   socials: [Social!]!
-  skillsCategries: [SkillsCategory!]!
+  skillsCategories: [SkillsCategory!]!
   skills: [Skill!]!
 }
 `, BuiltIn: false},
@@ -1203,7 +1203,7 @@ func (ec *executionContext) _Query_socials(ctx context.Context, field graphql.Co
 	return ec.marshalNSocial2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSocialᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_skillsCategries(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_skillsCategories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1221,7 +1221,7 @@ func (ec *executionContext) _Query_skillsCategries(ctx context.Context, field gr
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().SkillsCategries(rctx)
+		return ec.resolvers.Query().SkillsCategories(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3424,7 +3424,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "skillsCategries":
+		case "skillsCategories":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -3432,7 +3432,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_skillsCategries(ctx, field)
+				res = ec._Query_skillsCategories(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

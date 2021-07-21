@@ -6,4 +6,5 @@ type Project struct {
 	Description string
 	GithubURL   string
 	ProjectURL  string
+	isPublic    bool
 }
