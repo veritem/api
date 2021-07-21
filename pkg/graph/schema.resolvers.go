@@ -93,7 +93,7 @@ func (r *queryResolver) SkillsCategories(ctx context.Context) ([]*model.SkillsCa
 
 	var categories []db.SkillsCategory
 
-	result := db.DB.Find(&categories)
+	result := db.DB.Preload("Skills").Find(&categories)
 
 	if result.Error != nil {
 		return nil, gqlerror.Errorf("Failed to get categories: ", result.Error)
@@ -108,10 +108,27 @@ func (r *queryResolver) SkillsCategories(ctx context.Context) ([]*model.SkillsCa
 			Description: skillCategory.Description,
 			CreatedAt:   skillCategory.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:   skillCategory.UpdatedAt.Format(time.RFC3339),
+			Skills:      convertSkills(skillCategory.Skills),
 		})
 	}
 
 	return response, nil
+}
+
+func convertSkills(skills []db.Skill) []*model.Skill {
+
+	skillsModels := make([]*model.Skill, 0)
+
+	for _, item := range skills {
+		skillsModels = append(skillsModels, &model.Skill{
+			ID:          item.ID,
+			Name:        item.Name,
+			Description: item.Description,
+			CreatedAt:   item.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:   item.UpdatedAt.Format(time.RFC3339),
+		})
+	}
+	return skillsModels
 }
 
 func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
