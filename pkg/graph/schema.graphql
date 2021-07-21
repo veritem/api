@@ -9,6 +9,8 @@ type Blog {
   id: ID!
   title: String!
   url: String!
+  image: String!
+  summary: String!
   lastUpdated: String!
 }
 
