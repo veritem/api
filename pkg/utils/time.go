@@ -6,5 +6,6 @@ import (
 )
 
 func FormatTime(parseTime time.Time) string {
-	return strconv.FormatInt(parseTime.UnixNano()/int64(time.Millisecond), 10)
+	const numBase = 10
+	return strconv.FormatInt(parseTime.UnixNano()/int64(time.Millisecond), numBase)
 }

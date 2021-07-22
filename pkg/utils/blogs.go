@@ -9,7 +9,7 @@ import (
 type Blog struct {
 	Title     string `json:"title"`
 	Published int64  `json:"publishedOn"`
-	Url       string `json:"url"`
+	URL       string `json:"url"`
 	Image     string `json:"image"`
 	Summary   string `json:"summary"`
 }
@@ -20,6 +20,8 @@ func GetBlogs() []Blog {
 		return nil
 	}
 
+	defer response.Body.Close()
+
 	responseData, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
@@ -28,7 +30,11 @@ func GetBlogs() []Blog {
 
 	var blogs []Blog
 
-	json.Unmarshal(responseData, &blogs)
+	err = json.Unmarshal(responseData, &blogs)
+
+	if err != nil {
+		return nil
+	}
 
 	return blogs
 }
