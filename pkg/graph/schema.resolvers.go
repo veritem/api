@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/veritem/api/pkg/db"
@@ -15,6 +14,15 @@ import (
 	"github.com/veritem/api/pkg/graph/model"
 	"github.com/veritem/api/pkg/utils"
 )
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error) {
 	skillsCat := db.SkillsCategory{
@@ -134,6 +142,22 @@ func (r *queryResolver) SkillsCategories(ctx context.Context) ([]*model.SkillsCa
 	return response, nil
 }
 
+func convertSkills(skills []db.Skill) []*model.Skill {
+
+	skillsModels := make([]*model.Skill, 0)
+
+	for _, item := range skills {
+		skillsModels = append(skillsModels, &model.Skill{
+			ID:          item.ID,
+			Name:        item.Name,
+			Description: item.Description,
+			CreatedAt:   utils.FormatTime(item.CreatedAt),
+			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
+		})
+	}
+	return skillsModels
+}
+
 func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 	var skills []db.Skill
 
@@ -150,41 +174,10 @@ func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 			ID:          fmt.Sprint(skill.ID),
 			Name:        skill.Name,
 			Description: skill.Description,
-			CreatedAt:   skill.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:   skill.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:   utils.FormatTime(skill.CreatedAt),
+			UpdatedAt:   utils.FormatTime(skill.UpdatedAt),
 		})
 	}
 
 	return response, nil
-}
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func convertSkills(skills []db.Skill) []*model.Skill {
-
-	skillsModels := make([]*model.Skill, 0)
-
-	for _, item := range skills {
-		skillsModels = append(skillsModels, &model.Skill{
-			ID:          item.ID,
-			Name:        item.Name,
-			Description: item.Description,
-			CreatedAt:   utils.FormatTime(item.CreatedAt),
-			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
-		})
-	}
-	return skillsModels
 }
