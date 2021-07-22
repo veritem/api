@@ -170,7 +170,7 @@ func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 		return nil, gqlerror.Errorf("Failed to get skills!" + result.Error.Error())
 	}
 
-	response := make([]*model.Skill, 0, len([]*model.Skill{}))
+	response := make([]*model.Skill, 0)
 
 	for _, skill := range skills {
 		response = append(response, &model.Skill{
