@@ -15,12 +15,6 @@ import (
 	"github.com/veritem/api/pkg/utils"
 )
 
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 
@@ -79,7 +73,17 @@ func (r *mutationResolver) CreateSkill(ctx context.Context, input model.SkillInp
 	return response, nil
 }
 
+// nolint:gocritic,nolintlint // I don't know how i can fix this for now
 func (r *mutationResolver) GenerateSecret(ctx context.Context, input model.ScretInput) (*model.Secret, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+// nolint:gocritic,nolintlint // I don't know how i can fix this for now
+func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CreateProjectEcosystem(ctx context.Context, input model.ProjectEcoInput) (*model.ProjectEcosystem, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -184,3 +188,21 @@ func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 
 	return response, nil
 }
+
+func (r *queryResolver) OpenSource(ctx context.Context) (*model.OpenSource, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Projects(ctx context.Context) ([]*model.Project, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) ProjectsEcosystems(ctx context.Context) ([]*model.ProjectEcosystem, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }

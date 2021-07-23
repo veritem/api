@@ -17,11 +17,50 @@ type Blog struct {
 	LastUpdated string `json:"lastUpdated"`
 }
 
+type CreateProjectInput struct {
+	Name        string `json:"name"`
+	CategoryID  string `json:"categoryID"`
+	Description string `json:"description"`
+	IsPublic    bool   `json:"isPublic"`
+	GithubURL   string `json:"githubUrl"`
+	ProjectURL  string `json:"projectUrl"`
+}
+
 type Name struct {
 	First    string `json:"first"`
 	Middle   string `json:"middle"`
 	Last     string `json:"last"`
 	Username string `json:"username"`
+}
+
+type OpenSource struct {
+	OpenedPr        int `json:"openedPr"`
+	Projects        int `json:"projects"`
+	StarsReceived   int `json:"starsReceived"`
+	IssuesSubmitted int `json:"issuesSubmitted"`
+}
+
+type Project struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	IsPublic    bool   `json:"isPublic"`
+	GithubURL   string `json:"githubUrl"`
+	ProjectURL  string `json:"projectUrl"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
+}
+
+type ProjectEcoInput struct {
+	Name string `json:"name"`
+}
+
+type ProjectEcosystem struct {
+	ID        string     `json:"id"`
+	Name      string     `json:"name"`
+	Projects  []*Project `json:"projects"`
+	CreatedAt string     `json:"createdAt"`
+	UpdatedAt string     `json:"updatedAt"`
 }
 
 type ScretInput struct {
