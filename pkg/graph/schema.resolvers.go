@@ -80,11 +80,54 @@ func (r *mutationResolver) GenerateSecret(ctx context.Context, input model.Scret
 
 // nolint:gocritic,nolintlint // I don't know how i can fix this for now
 func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
-	panic(fmt.Errorf("not implemented"))
+	var projectEcosystem db.ProjectEcosystem
+
+	db.DB.Where("id = ? ", input.CategoryID).First(&projectEcosystem)
+
+	if len(projectEcosystem.Name) == 0 {
+		return nil, gqlerror.Errorf("Peoject Ecosystem not found!")
+	}
+
+	newProject := db.Project{
+		ProjectEcosystemID: projectEcosystem.ID,
+		Name:               input.Name,
+		Description:        input.Description,
+		ProjectURL:         input.ProjectURL,
+		GithubURL:          input.GithubURL,
+		Public:             input.IsPublic,
+	}
+
+	db.DB.Create(&newProject)
+
+	return &model.Project{
+		ID:          newProject.ID,
+		Name:        newProject.Name,
+		Description: newProject.Description,
+		ProjectURL:  newProject.ProjectURL,
+		GithubURL:   newProject.GithubURL,
+		CreatedAt:   utils.FormatTime(newProject.CreatedAt),
+		UpdatedAt:   utils.FormatTime(newProject.UpdatedAt),
+		IsPublic:    newProject.Public,
+	}, nil
 }
 
 func (r *mutationResolver) CreateProjectEcosystem(ctx context.Context, input model.ProjectEcoInput) (*model.ProjectEcosystem, error) {
-	panic(fmt.Errorf("not implemented"))
+	ecosystem := db.ProjectEcosystem{
+		Name: input.Name,
+	}
+
+	result := db.DB.Create(&ecosystem)
+
+	if result.Error != nil {
+		return nil, gqlerror.Errorf("Failed to create ecosystem!")
+	}
+
+	return &model.ProjectEcosystem{
+		Name:      ecosystem.Name,
+		ID:        ecosystem.ID,
+		CreatedAt: utils.FormatTime(ecosystem.CreatedAt),
+		UpdatedAt: utils.FormatTime(ecosystem.UpdatedAt),
+	}, nil
 }
 
 func (r *queryResolver) Names(ctx context.Context) (*model.Name, error) {
@@ -194,11 +237,75 @@ func (r *queryResolver) OpenSource(ctx context.Context) (*model.OpenSource, erro
 }
 
 func (r *queryResolver) Projects(ctx context.Context) ([]*model.Project, error) {
-	panic(fmt.Errorf("not implemented"))
+	var projects []*db.Project
+
+	dbQuery := db.DB.Find(&projects)
+
+	if dbQuery.Error != nil {
+		return nil, gqlerror.Errorf("Failed to get Projects")
+	}
+
+	var response = make([]*model.Project, 0)
+
+	for _, item := range projects {
+		response = append(response, &model.Project{
+			Name:        item.Name,
+			ID:          item.ID,
+			Description: item.Description,
+			CreatedAt:   utils.FormatTime(item.CreatedAt),
+			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
+			IsPublic:    item.Public,
+			GithubURL:   item.GithubURL,
+			ProjectURL:  item.ProjectURL,
+		})
+	}
+
+	return response, nil
 }
 
 func (r *queryResolver) ProjectsEcosystems(ctx context.Context) ([]*model.ProjectEcosystem, error) {
-	panic(fmt.Errorf("not implemented"))
+	var projectsEco []db.ProjectEcosystem
+
+	db.DB.Preload("Projects").Find(&projectsEco)
+
+	var response = make([]*model.ProjectEcosystem, 0)
+
+	for _, item := range projectsEco {
+		response = append(response, &model.ProjectEcosystem{
+			Name:      item.Name,
+			ID:        item.ID,
+			CreatedAt: utils.FormatTime(item.CreatedAt),
+			UpdatedAt: utils.FormatTime(item.UpdatedAt),
+			Projects:  convertProject(item.Projects),
+		})
+	}
+
+	return response, nil
+}
+
+func convertProject(dbProject []db.Project) []*model.Project {
+	var projects = make([]*model.Project, 0)
+
+	var dbProjects []*db.Project
+
+	for i := 0; i < len(dbProject); i++ {
+		dbProjects = append(dbProjects, &dbProject[i])
+	}
+
+	for _, item := range dbProjects {
+		projects = append(projects, &model.Project{
+			Name:        item.Name,
+			ID:          item.ID,
+			Description: item.Description,
+			CreatedAt:   utils.FormatTime(item.CreatedAt),
+			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
+			IsPublic:    item.Public,
+			GithubURL:   item.GithubURL,
+			ProjectURL:  item.ProjectURL,
+		})
+	}
+
+	return projects
 }
 
 // Mutation returns generated.MutationResolver implementation.
