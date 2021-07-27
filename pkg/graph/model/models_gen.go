@@ -34,10 +34,11 @@ type Name struct {
 }
 
 type OpenSource struct {
-	OpenedPr        int `json:"openedPr"`
-	Projects        int `json:"projects"`
-	StarsReceived   int `json:"starsReceived"`
-	IssuesSubmitted int `json:"issuesSubmitted"`
+	OpenedPr                int `json:"openedPr"`
+	StarsReceived           int `json:"starsReceived"`
+	IssuesSubmitted         int `json:"issuesSubmitted"`
+	RepositoriesContributed int `json:"repositoriesContributed"`
+	Repositories            int `json:"repositories"`
 }
 
 type Project struct {

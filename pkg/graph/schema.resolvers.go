@@ -10,13 +10,11 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/veritem/api/pkg/db"
+	"github.com/veritem/api/pkg/github"
 	"github.com/veritem/api/pkg/graph/generated"
 	"github.com/veritem/api/pkg/graph/model"
 	"github.com/veritem/api/pkg/utils"
 )
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
 
 func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error) {
 	skillsCat := db.SkillsCategory{
@@ -73,12 +71,10 @@ func (r *mutationResolver) CreateSkill(ctx context.Context, input model.SkillInp
 	return response, nil
 }
 
-// nolint:gocritic,nolintlint // I don't know how i can fix this for now
 func (r *mutationResolver) GenerateSecret(ctx context.Context, input model.ScretInput) (*model.Secret, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-// nolint:gocritic,nolintlint // I don't know how i can fix this for now
 func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
 	var projectEcosystem db.ProjectEcosystem
 
@@ -192,22 +188,6 @@ func (r *queryResolver) SkillsCategories(ctx context.Context) ([]*model.SkillsCa
 	return response, nil
 }
 
-func convertSkills(skills []db.Skill) []*model.Skill {
-	skillsModels := make([]*model.Skill, 0)
-
-	for _, item := range skills {
-		skillsModels = append(skillsModels, &model.Skill{
-			ID:          item.ID,
-			Name:        item.Name,
-			Description: item.Description,
-			CreatedAt:   utils.FormatTime(item.CreatedAt),
-			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
-		})
-	}
-
-	return skillsModels
-}
-
 func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 	var skills []db.Skill
 
@@ -233,7 +213,7 @@ func (r *queryResolver) Skills(ctx context.Context) ([]*model.Skill, error) {
 }
 
 func (r *queryResolver) OpenSource(ctx context.Context) (*model.OpenSource, error) {
-	panic(fmt.Errorf("not implemented"))
+	return github.Contributions(), nil
 }
 
 func (r *queryResolver) Projects(ctx context.Context) ([]*model.Project, error) {
@@ -283,6 +263,30 @@ func (r *queryResolver) ProjectsEcosystems(ctx context.Context) ([]*model.Projec
 	return response, nil
 }
 
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
+
+func convertSkills(skills []db.Skill) []*model.Skill {
+	skillsModels := make([]*model.Skill, 0)
+
+	for _, item := range skills {
+		skillsModels = append(skillsModels, &model.Skill{
+			ID:          item.ID,
+			Name:        item.Name,
+			Description: item.Description,
+			CreatedAt:   utils.FormatTime(item.CreatedAt),
+			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
+		})
+	}
+
+	return skillsModels
+}
 func convertProject(dbProject []db.Project) []*model.Project {
 	var projects = make([]*model.Project, 0)
 
@@ -307,9 +311,3 @@ func convertProject(dbProject []db.Project) []*model.Project {
 
 	return projects
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }

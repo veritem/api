@@ -102,9 +102,10 @@ input ProjectEcoInput {
 
 type OpenSource {
   openedPr: Int!
-  projects: Int!
   starsReceived: Int!
   issuesSubmitted: Int!
+  repositoriesContributed: Int!
+  repositories: Int!
 }
 
 type Mutation {

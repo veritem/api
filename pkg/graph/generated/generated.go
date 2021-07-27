@@ -68,10 +68,11 @@ type ComplexityRoot struct {
 	}
 
 	OpenSource struct {
-		IssuesSubmitted func(childComplexity int) int
-		OpenedPr        func(childComplexity int) int
-		Projects        func(childComplexity int) int
-		StarsReceived   func(childComplexity int) int
+		IssuesSubmitted         func(childComplexity int) int
+		OpenedPr                func(childComplexity int) int
+		Repositories            func(childComplexity int) int
+		RepositoriesContributed func(childComplexity int) int
+		StarsReceived           func(childComplexity int) int
 	}
 
 	Project struct {
@@ -316,12 +317,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.OpenSource.OpenedPr(childComplexity), true
 
-	case "OpenSource.projects":
-		if e.complexity.OpenSource.Projects == nil {
+	case "OpenSource.repositories":
+		if e.complexity.OpenSource.Repositories == nil {
 			break
 		}
 
-		return e.complexity.OpenSource.Projects(childComplexity), true
+		return e.complexity.OpenSource.Repositories(childComplexity), true
+
+	case "OpenSource.repositoriesContributed":
+		if e.complexity.OpenSource.RepositoriesContributed == nil {
+			break
+		}
+
+		return e.complexity.OpenSource.RepositoriesContributed(childComplexity), true
 
 	case "OpenSource.starsReceived":
 		if e.complexity.OpenSource.StarsReceived == nil {
@@ -792,9 +800,10 @@ input ProjectEcoInput {
 
 type OpenSource {
   openedPr: Int!
-  projects: Int!
   starsReceived: Int!
   issuesSubmitted: Int!
+  repositoriesContributed: Int!
+  repositories: Int!
 }
 
 type Mutation {
@@ -1547,41 +1556,6 @@ func (ec *executionContext) _OpenSource_openedPr(ctx context.Context, field grap
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _OpenSource_projects(ctx context.Context, field graphql.CollectedField, obj *model.OpenSource) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "OpenSource",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Projects, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _OpenSource_starsReceived(ctx context.Context, field graphql.CollectedField, obj *model.OpenSource) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1636,6 +1610,76 @@ func (ec *executionContext) _OpenSource_issuesSubmitted(ctx context.Context, fie
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IssuesSubmitted, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpenSource_repositoriesContributed(ctx context.Context, field graphql.CollectedField, obj *model.OpenSource) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "OpenSource",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RepositoriesContributed, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpenSource_repositories(ctx context.Context, field graphql.CollectedField, obj *model.OpenSource) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "OpenSource",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Repositories, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4618,11 +4662,6 @@ func (ec *executionContext) _OpenSource(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "projects":
-			out.Values[i] = ec._OpenSource_projects(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "starsReceived":
 			out.Values[i] = ec._OpenSource_starsReceived(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4630,6 +4669,16 @@ func (ec *executionContext) _OpenSource(ctx context.Context, sel ast.SelectionSe
 			}
 		case "issuesSubmitted":
 			out.Values[i] = ec._OpenSource_issuesSubmitted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "repositoriesContributed":
+			out.Values[i] = ec._OpenSource_repositoriesContributed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "repositories":
+			out.Values[i] = ec._OpenSource_repositories(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
