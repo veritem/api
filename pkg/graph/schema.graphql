@@ -106,6 +106,8 @@ type OpenSource {
   issuesSubmitted: Int!
   repositoriesContributed: Int!
   repositories: Int!
+  started: String!
+  commitContributions: String!
 }
 
 type Mutation {

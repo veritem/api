@@ -1,11 +1,11 @@
 package github
 
 import (
-	"log"
 	"time"
 
 	"github.com/shurcooL/githubv4"
 	"github.com/veritem/api/pkg/graph/model"
+	"github.com/veritem/api/pkg/utils"
 )
 
 var query struct {
@@ -36,7 +36,7 @@ func Contributions() *model.OpenSource {
 	err := Client().Query(Ctx, &query, nil)
 
 	if err != nil {
-		log.Println("Error: ", err)
+		return &model.OpenSource{}
 	}
 
 	return &model.OpenSource{
@@ -44,5 +44,6 @@ func Contributions() *model.OpenSource {
 		IssuesSubmitted:         int(query.Viewer.Issues.TotalCount),
 		Repositories:            int(query.Viewer.Repositories.TotalCount),
 		RepositoriesContributed: int(query.Viewer.RepositoriesContributedTo.TotalCount),
+		Started:                 utils.FormatTime(query.Viewer.ContributionsCollection.StartedAt),
 	}
 }

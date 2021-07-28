@@ -16,6 +16,9 @@ import (
 	"github.com/veritem/api/pkg/utils"
 )
 
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
+
 func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error) {
 	skillsCat := db.SkillsCategory{
 		Name:        input.Name,
@@ -75,12 +78,13 @@ func (r *mutationResolver) GenerateSecret(ctx context.Context, input model.Scret
 	panic(fmt.Errorf("not implemented"))
 }
 
+//nolint:gocritic //never mind
 func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
 	var projectEcosystem db.ProjectEcosystem
 
 	db.DB.Where("id = ? ", input.CategoryID).First(&projectEcosystem)
 
-	if len(projectEcosystem.Name) == 0 {
+	if projectEcosystem.Name == "" {
 		return nil, gqlerror.Errorf("Peoject Ecosystem not found!")
 	}
 
@@ -269,9 +273,12 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
 func convertSkills(skills []db.Skill) []*model.Skill {
 	skillsModels := make([]*model.Skill, 0)
 
