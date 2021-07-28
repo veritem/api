@@ -110,10 +110,28 @@ type OpenSource {
   commitContributions: String!
 }
 
+type Experience {
+  id: ID!
+  name: String!
+  startedAt: String!
+  endedAt: String
+  roles: [String!]!
+  CreatedAt: String!
+  UpdatedAt: String!
+}
+
+input CreateExperienceInput {
+  name: String!
+  startedAt: String!
+  endedAt: String
+  roles: [String!]!
+}
+
 type Mutation {
   createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
   createSkill(input: SkillInput!): Skill!
   generateSecret(input: ScretInput!): Secret!
+  createExperience(input: CreateExperienceInput!): Experience!
   createProject(input: CreateProjectInput!): Project!
   createProjectEcosystem(input: ProjectEcoInput!): ProjectEcosystem!
 }
@@ -127,5 +145,6 @@ type Query {
   skills: [Skill!]!
   openSource: OpenSource!
   projects: [Project!]!
+  experiences: [Experience!]!
   projectsEcosystems: [ProjectEcosystem!]!
 }

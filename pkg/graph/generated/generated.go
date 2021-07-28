@@ -52,7 +52,18 @@ type ComplexityRoot struct {
 		URL         func(childComplexity int) int
 	}
 
+	Experience struct {
+		CreatedAt func(childComplexity int) int
+		EndedAt   func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Roles     func(childComplexity int) int
+		StartedAt func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+	}
+
 	Mutation struct {
+		CreateExperience       func(childComplexity int, input model.CreateExperienceInput) int
 		CreateProject          func(childComplexity int, input model.CreateProjectInput) int
 		CreateProjectEcosystem func(childComplexity int, input model.ProjectEcoInput) int
 		CreateSkill            func(childComplexity int, input model.SkillInput) int
@@ -98,6 +109,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Blogs              func(childComplexity int) int
+		Experiences        func(childComplexity int) int
 		Names              func(childComplexity int) int
 		OpenSource         func(childComplexity int) int
 		Projects           func(childComplexity int) int
@@ -145,6 +157,7 @@ type MutationResolver interface {
 	CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error)
 	CreateSkill(ctx context.Context, input model.SkillInput) (*model.Skill, error)
 	GenerateSecret(ctx context.Context, input model.ScretInput) (*model.Secret, error)
+	CreateExperience(ctx context.Context, input model.CreateExperienceInput) (*model.Experience, error)
 	CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error)
 	CreateProjectEcosystem(ctx context.Context, input model.ProjectEcoInput) (*model.ProjectEcosystem, error)
 }
@@ -157,6 +170,7 @@ type QueryResolver interface {
 	Skills(ctx context.Context) ([]*model.Skill, error)
 	OpenSource(ctx context.Context) (*model.OpenSource, error)
 	Projects(ctx context.Context) ([]*model.Project, error)
+	Experiences(ctx context.Context) ([]*model.Experience, error)
 	ProjectsEcosystems(ctx context.Context) ([]*model.ProjectEcosystem, error)
 }
 
@@ -216,6 +230,67 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Blog.URL(childComplexity), true
+
+	case "Experience.CreatedAt":
+		if e.complexity.Experience.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Experience.CreatedAt(childComplexity), true
+
+	case "Experience.endedAt":
+		if e.complexity.Experience.EndedAt == nil {
+			break
+		}
+
+		return e.complexity.Experience.EndedAt(childComplexity), true
+
+	case "Experience.id":
+		if e.complexity.Experience.ID == nil {
+			break
+		}
+
+		return e.complexity.Experience.ID(childComplexity), true
+
+	case "Experience.name":
+		if e.complexity.Experience.Name == nil {
+			break
+		}
+
+		return e.complexity.Experience.Name(childComplexity), true
+
+	case "Experience.roles":
+		if e.complexity.Experience.Roles == nil {
+			break
+		}
+
+		return e.complexity.Experience.Roles(childComplexity), true
+
+	case "Experience.startedAt":
+		if e.complexity.Experience.StartedAt == nil {
+			break
+		}
+
+		return e.complexity.Experience.StartedAt(childComplexity), true
+
+	case "Experience.UpdatedAt":
+		if e.complexity.Experience.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Experience.UpdatedAt(childComplexity), true
+
+	case "Mutation.createExperience":
+		if e.complexity.Mutation.CreateExperience == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createExperience_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateExperience(childComplexity, args["input"].(model.CreateExperienceInput)), true
 
 	case "Mutation.createProject":
 		if e.complexity.Mutation.CreateProject == nil {
@@ -451,6 +526,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Blogs(childComplexity), true
+
+	case "Query.experiences":
+		if e.complexity.Query.Experiences == nil {
+			break
+		}
+
+		return e.complexity.Query.Experiences(childComplexity), true
 
 	case "Query.names":
 		if e.complexity.Query.Names == nil {
@@ -824,10 +906,28 @@ type OpenSource {
   commitContributions: String!
 }
 
+type Experience {
+  id: ID!
+  name: String!
+  startedAt: String!
+  endedAt: String
+  roles: [String!]!
+  CreatedAt: String!
+  UpdatedAt: String!
+}
+
+input CreateExperienceInput {
+  name: String!
+  startedAt: String!
+  endedAt: String
+  roles: [String!]!
+}
+
 type Mutation {
   createSkillCategory(input: SkillsCategoryInput!): SkillsCategory!
   createSkill(input: SkillInput!): Skill!
   generateSecret(input: ScretInput!): Secret!
+  createExperience(input: CreateExperienceInput!): Experience!
   createProject(input: CreateProjectInput!): Project!
   createProjectEcosystem(input: ProjectEcoInput!): ProjectEcosystem!
 }
@@ -841,6 +941,7 @@ type Query {
   skills: [Skill!]!
   openSource: OpenSource!
   projects: [Project!]!
+  experiences: [Experience!]!
   projectsEcosystems: [ProjectEcosystem!]!
 }
 `, BuiltIn: false},
@@ -850,6 +951,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createExperience_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CreateExperienceInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNCreateExperienceInput2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐCreateExperienceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createProjectEcosystem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1189,6 +1305,248 @@ func (ec *executionContext) _Blog_lastUpdated(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Experience_id(ctx context.Context, field graphql.CollectedField, obj *model.Experience) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Experience",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Experience_name(ctx context.Context, field graphql.CollectedField, obj *model.Experience) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Experience",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Experience_startedAt(ctx context.Context, field graphql.CollectedField, obj *model.Experience) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Experience",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Experience_endedAt(ctx context.Context, field graphql.CollectedField, obj *model.Experience) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Experience",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Experience_roles(ctx context.Context, field graphql.CollectedField, obj *model.Experience) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Experience",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Roles, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Experience_CreatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Experience) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Experience",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Experience_UpdatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Experience) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Experience",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createSkillCategory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1313,6 +1671,48 @@ func (ec *executionContext) _Mutation_generateSecret(ctx context.Context, field 
 	res := resTmp.(*model.Secret)
 	fc.Result = res
 	return ec.marshalNSecret2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐSecret(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createExperience(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createExperience_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateExperience(rctx, args["input"].(model.CreateExperienceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Experience)
+	fc.Result = res
+	return ec.marshalNExperience2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐExperience(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createProject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2514,6 +2914,41 @@ func (ec *executionContext) _Query_projects(ctx context.Context, field graphql.C
 	res := resTmp.([]*model.Project)
 	fc.Result = res
 	return ec.marshalNProject2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐProjectᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_experiences(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Experiences(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Experience)
+	fc.Result = res
+	return ec.marshalNExperience2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐExperienceᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_projectsEcosystems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4409,6 +4844,50 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputCreateExperienceInput(ctx context.Context, obj interface{}) (model.CreateExperienceInput, error) {
+	var it model.CreateExperienceInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startedAt"))
+			it.StartedAt, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "endedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endedAt"))
+			it.EndedAt, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "roles":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roles"))
+			it.Roles, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateProjectInput(ctx context.Context, obj interface{}) (model.CreateProjectInput, error) {
 	var it model.CreateProjectInput
 	var asMap = obj.(map[string]interface{})
@@ -4641,6 +5120,60 @@ func (ec *executionContext) _Blog(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var experienceImplementors = []string{"Experience"}
+
+func (ec *executionContext) _Experience(ctx context.Context, sel ast.SelectionSet, obj *model.Experience) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, experienceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Experience")
+		case "id":
+			out.Values[i] = ec._Experience_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Experience_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "startedAt":
+			out.Values[i] = ec._Experience_startedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "endedAt":
+			out.Values[i] = ec._Experience_endedAt(ctx, field, obj)
+		case "roles":
+			out.Values[i] = ec._Experience_roles(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "CreatedAt":
+			out.Values[i] = ec._Experience_CreatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "UpdatedAt":
+			out.Values[i] = ec._Experience_UpdatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -4668,6 +5201,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "generateSecret":
 			out.Values[i] = ec._Mutation_generateSecret(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createExperience":
+			out.Values[i] = ec._Mutation_createExperience(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5019,6 +5557,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_projects(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "experiences":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_experiences(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -5511,9 +6063,65 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNCreateExperienceInput2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐCreateExperienceInput(ctx context.Context, v interface{}) (model.CreateExperienceInput, error) {
+	res, err := ec.unmarshalInputCreateExperienceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateProjectInput2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐCreateProjectInput(ctx context.Context, v interface{}) (model.CreateProjectInput, error) {
 	res, err := ec.unmarshalInputCreateProjectInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNExperience2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐExperience(ctx context.Context, sel ast.SelectionSet, v model.Experience) graphql.Marshaler {
+	return ec._Experience(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNExperience2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐExperienceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Experience) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNExperience2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐExperience(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNExperience2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐExperience(ctx context.Context, sel ast.SelectionSet, v *model.Experience) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Experience(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
@@ -5882,6 +6490,36 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

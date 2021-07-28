@@ -17,6 +17,13 @@ type Blog struct {
 	LastUpdated string `json:"lastUpdated"`
 }
 
+type CreateExperienceInput struct {
+	Name      string   `json:"name"`
+	StartedAt string   `json:"startedAt"`
+	EndedAt   *string  `json:"endedAt"`
+	Roles     []string `json:"roles"`
+}
+
 type CreateProjectInput struct {
 	Name        string `json:"name"`
 	CategoryID  string `json:"categoryID"`
@@ -24,6 +31,16 @@ type CreateProjectInput struct {
 	IsPublic    bool   `json:"isPublic"`
 	GithubURL   string `json:"githubUrl"`
 	ProjectURL  string `json:"projectUrl"`
+}
+
+type Experience struct {
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	StartedAt string   `json:"startedAt"`
+	EndedAt   *string  `json:"endedAt"`
+	Roles     []string `json:"roles"`
+	CreatedAt string   `json:"CreatedAt"`
+	UpdatedAt string   `json:"UpdatedAt"`
 }
 
 type Name struct {

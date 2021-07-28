@@ -42,7 +42,7 @@ func Connect() error {
 		return err
 	}
 
-	err = db.AutoMigrate(&SkillsCategory{}, &Skill{}, &Secret{}, &ProjectEcosystem{}, &Project{})
+	err = db.AutoMigrate(&SkillsCategory{}, &Skill{}, &Secret{}, &ProjectEcosystem{}, &Project{}, &Experience{})
 
 	if err != nil {
 		return err

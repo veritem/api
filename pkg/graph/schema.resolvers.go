@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/veritem/api/pkg/db"
@@ -78,7 +79,50 @@ func (r *mutationResolver) GenerateSecret(ctx context.Context, input model.Scret
 	panic(fmt.Errorf("not implemented"))
 }
 
-//nolint:gocritic //never mind
+func (r *mutationResolver) CreateExperience(ctx context.Context, input model.CreateExperienceInput) (*model.Experience, error) {
+	var startedAt *time.Time
+
+	var endedAt *time.Time
+
+	var err error
+
+	startedAt, err = parseDate(input.StartedAt)
+
+	if input.EndedAt != nil {
+		endedAt, err = parseDate(*input.EndedAt)
+	}
+
+	if err != nil {
+		return nil, gqlerror.Errorf(err.Error())
+	}
+
+	var expreince = db.Experience{
+		Name:      input.Name,
+		StartedAt: *startedAt,
+		EndedAt:   *endedAt,
+		Roles:     input.Roles,
+	}
+
+	result := db.DB.Create(&expreince)
+
+	if result.Error != nil {
+		return nil, gqlerror.Errorf("Failed to create project!")
+	}
+
+	EndedAt := utils.FormatTime(expreince.EndedAt)
+
+	return &model.Experience{
+		ID:        expreince.ID,
+		Name:      expreince.Name,
+		StartedAt: utils.FormatTime(expreince.StartedAt),
+		EndedAt:   &EndedAt,
+		CreatedAt: utils.FormatTime(expreince.CreatedAt),
+		UpdatedAt: utils.FormatTime(expreince.UpdatedAt),
+		Roles:     expreince.Roles,
+	}, nil
+}
+
+//nolint:gocritic // Will comeback to this later
 func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
 	var projectEcosystem db.ProjectEcosystem
 
@@ -135,7 +179,7 @@ func (r *queryResolver) Names(ctx context.Context) (*model.Name, error) {
 }
 
 func (r *queryResolver) Status(ctx context.Context) (string, error) {
-	return "Building stuffs to help people learn and grow!", nil
+	return "Building opensource for humans!", nil
 }
 
 func (r *queryResolver) Blogs(ctx context.Context) ([]*model.Blog, error) {
@@ -247,6 +291,31 @@ func (r *queryResolver) Projects(ctx context.Context) ([]*model.Project, error) 
 	return response, nil
 }
 
+func (r *queryResolver) Experiences(ctx context.Context) ([]*model.Experience, error) {
+	var expreinces []db.Experience
+
+	db.DB.Find(&expreinces)
+
+	var response = make([]*model.Experience, 0)
+
+	//nolint:gocritic // fixed
+	for _, item := range expreinces {
+		endedAt := utils.FormatTime(item.EndedAt)
+
+		response = append(response, &model.Experience{
+			Name:      item.ID,
+			ID:        item.ID,
+			StartedAt: utils.FormatTime(item.StartedAt),
+			EndedAt:   &endedAt,
+			CreatedAt: utils.FormatTime(item.CreatedAt),
+			UpdatedAt: utils.FormatTime(item.UpdatedAt),
+			Roles:     item.Roles,
+		})
+	}
+
+	return response, nil
+}
+
 func (r *queryResolver) ProjectsEcosystems(ctx context.Context) ([]*model.ProjectEcosystem, error) {
 	var projectsEco []db.ProjectEcosystem
 
@@ -279,6 +348,15 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func parseDate(date string) (*time.Time, error) {
+	tm, err := time.Parse("02/2006", date)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &tm, nil
+}
 func convertSkills(skills []db.Skill) []*model.Skill {
 	skillsModels := make([]*model.Skill, 0)
 
