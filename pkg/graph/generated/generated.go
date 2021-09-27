@@ -94,6 +94,7 @@ type ComplexityRoot struct {
 		GithubURL   func(childComplexity int) int
 		ID          func(childComplexity int) int
 		IsPublic    func(childComplexity int) int
+		Logo        func(childComplexity int) int
 		Name        func(childComplexity int) int
 		ProjectURL  func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
@@ -464,6 +465,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Project.IsPublic(childComplexity), true
 
+	case "Project.logo":
+		if e.complexity.Project.Logo == nil {
+			break
+		}
+
+		return e.complexity.Project.Logo(childComplexity), true
+
 	case "Project.name":
 		if e.complexity.Project.Name == nil {
 			break
@@ -814,6 +822,7 @@ type Project {
   id: ID!
   name: String!
   description: String!
+  logo: String
   isPublic: Boolean!
   githubUrl: String!
   projectUrl: String!
@@ -886,6 +895,7 @@ enum Role {
 input CreateProjectInput {
   name: String!
   categoryID: ID!
+  logo: String!
   description: String!
   isPublic: Boolean!
   githubUrl: String!
@@ -2287,6 +2297,38 @@ func (ec *executionContext) _Project_description(ctx context.Context, field grap
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Project_logo(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Logo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Project_isPublic(ctx context.Context, field graphql.CollectedField, obj *model.Project) (ret graphql.Marshaler) {
@@ -4910,6 +4952,14 @@ func (ec *executionContext) unmarshalInputCreateProjectInput(ctx context.Context
 			if err != nil {
 				return it, err
 			}
+		case "logo":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("logo"))
+			it.Logo, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description":
 			var err error
 
@@ -5355,6 +5405,8 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "logo":
+			out.Values[i] = ec._Project_logo(ctx, field, obj)
 		case "isPublic":
 			out.Values[i] = ec._Project_isPublic(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

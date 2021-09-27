@@ -27,6 +27,7 @@ type CreateExperienceInput struct {
 type CreateProjectInput struct {
 	Name        string `json:"name"`
 	CategoryID  string `json:"categoryID"`
+	Logo        string `json:"logo"`
 	Description string `json:"description"`
 	IsPublic    bool   `json:"isPublic"`
 	GithubURL   string `json:"githubUrl"`
@@ -61,14 +62,15 @@ type OpenSource struct {
 }
 
 type Project struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	IsPublic    bool   `json:"isPublic"`
-	GithubURL   string `json:"githubUrl"`
-	ProjectURL  string `json:"projectUrl"`
-	CreatedAt   string `json:"createdAt"`
-	UpdatedAt   string `json:"updatedAt"`
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Logo        *string `json:"logo"`
+	IsPublic    bool    `json:"isPublic"`
+	GithubURL   string  `json:"githubUrl"`
+	ProjectURL  string  `json:"projectUrl"`
+	CreatedAt   string  `json:"createdAt"`
+	UpdatedAt   string  `json:"updatedAt"`
 }
 
 type ProjectEcoInput struct {

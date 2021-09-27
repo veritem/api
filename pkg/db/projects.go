@@ -8,4 +8,5 @@ type Project struct {
 	ProjectURL         string
 	Public             bool
 	ProjectEcosystemID string
+	Logo               string
 }

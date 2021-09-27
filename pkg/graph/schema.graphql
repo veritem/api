@@ -18,6 +18,7 @@ type Project {
   id: ID!
   name: String!
   description: String!
+  logo: String
   isPublic: Boolean!
   githubUrl: String!
   projectUrl: String!
@@ -90,6 +91,7 @@ enum Role {
 input CreateProjectInput {
   name: String!
   categoryID: ID!
+  logo: String!
   description: String!
   isPublic: Boolean!
   githubUrl: String!

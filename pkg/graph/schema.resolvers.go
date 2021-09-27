@@ -17,9 +17,6 @@ import (
 	"github.com/veritem/api/pkg/utils"
 )
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-
 func (r *mutationResolver) CreateSkillCategory(ctx context.Context, input model.SkillsCategoryInput) (*model.SkillsCategory, error) {
 	skillsCat := db.SkillsCategory{
 		Name:        input.Name,
@@ -122,7 +119,6 @@ func (r *mutationResolver) CreateExperience(ctx context.Context, input model.Cre
 	}, nil
 }
 
-//nolint:gocritic // Will comeback to this later
 func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
 	var projectEcosystem db.ProjectEcosystem
 
@@ -139,6 +135,7 @@ func (r *mutationResolver) CreateProject(ctx context.Context, input model.Create
 		ProjectURL:         input.ProjectURL,
 		GithubURL:          input.GithubURL,
 		Public:             input.IsPublic,
+		Logo:               input.Logo,
 	}
 
 	db.DB.Create(&newProject)
@@ -279,6 +276,7 @@ func (r *queryResolver) Projects(ctx context.Context) ([]*model.Project, error) 
 		response = append(response, &model.Project{
 			Name:        item.Name,
 			ID:          item.ID,
+			Logo:        &item.Logo,
 			Description: item.Description,
 			CreatedAt:   utils.FormatTime(item.CreatedAt),
 			UpdatedAt:   utils.FormatTime(item.UpdatedAt),
@@ -341,6 +339,9 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
 
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
