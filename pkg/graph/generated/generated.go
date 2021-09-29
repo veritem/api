@@ -62,6 +62,14 @@ type ComplexityRoot struct {
 		UpdatedAt func(childComplexity int) int
 	}
 
+	LatestProjects struct {
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Stars       func(childComplexity int) int
+		URL         func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateExperience       func(childComplexity int, input model.CreateExperienceInput) int
 		CreateProject          func(childComplexity int, input model.CreateProjectInput) int
@@ -111,6 +119,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Blogs              func(childComplexity int) int
 		Experiences        func(childComplexity int) int
+		LatestProjects     func(childComplexity int) int
 		Names              func(childComplexity int) int
 		OpenSource         func(childComplexity int) int
 		Projects           func(childComplexity int) int
@@ -163,6 +172,7 @@ type MutationResolver interface {
 	CreateProjectEcosystem(ctx context.Context, input model.ProjectEcoInput) (*model.ProjectEcosystem, error)
 }
 type QueryResolver interface {
+	LatestProjects(ctx context.Context) ([]*model.LatestProjects, error)
 	Names(ctx context.Context) (*model.Name, error)
 	Status(ctx context.Context) (string, error)
 	Blogs(ctx context.Context) ([]*model.Blog, error)
@@ -280,6 +290,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Experience.UpdatedAt(childComplexity), true
+
+	case "LatestProjects.description":
+		if e.complexity.LatestProjects.Description == nil {
+			break
+		}
+
+		return e.complexity.LatestProjects.Description(childComplexity), true
+
+	case "LatestProjects.id":
+		if e.complexity.LatestProjects.ID == nil {
+			break
+		}
+
+		return e.complexity.LatestProjects.ID(childComplexity), true
+
+	case "LatestProjects.name":
+		if e.complexity.LatestProjects.Name == nil {
+			break
+		}
+
+		return e.complexity.LatestProjects.Name(childComplexity), true
+
+	case "LatestProjects.stars":
+		if e.complexity.LatestProjects.Stars == nil {
+			break
+		}
+
+		return e.complexity.LatestProjects.Stars(childComplexity), true
+
+	case "LatestProjects.url":
+		if e.complexity.LatestProjects.URL == nil {
+			break
+		}
+
+		return e.complexity.LatestProjects.URL(childComplexity), true
 
 	case "Mutation.createExperience":
 		if e.complexity.Mutation.CreateExperience == nil {
@@ -542,6 +587,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Experiences(childComplexity), true
 
+	case "Query.latestProjects":
+		if e.complexity.Query.LatestProjects == nil {
+			break
+		}
+
+		return e.complexity.Query.LatestProjects(childComplexity), true
+
 	case "Query.names":
 		if e.complexity.Query.Names == nil {
 			break
@@ -633,7 +685,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Secret.Token(childComplexity), true
 
-	case "Secret.UpdatedAt":
+	case "Secret.updatedAt":
 		if e.complexity.Secret.UpdatedAt == nil {
 			break
 		}
@@ -883,7 +935,7 @@ type Secret {
   token: String!
   expiresIn: String!
   createdAt: String!
-  UpdatedAt: String!
+  updatedAt: String!
 }
 
 enum Role {
@@ -916,6 +968,14 @@ type OpenSource {
   commitContributions: String!
 }
 
+type LatestProjects {
+  id: ID!
+  name: String!
+  stars: Int!
+  url: String!
+  description: String!
+}
+
 type Experience {
   id: ID!
   name: String!
@@ -943,6 +1003,7 @@ type Mutation {
 }
 
 type Query {
+  latestProjects: [LatestProjects!]!
   names: Name!
   status: String!
   blogs: [Blog!]
@@ -1541,6 +1602,181 @@ func (ec *executionContext) _Experience_UpdatedAt(ctx context.Context, field gra
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LatestProjects_id(ctx context.Context, field graphql.CollectedField, obj *model.LatestProjects) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LatestProjects",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LatestProjects_name(ctx context.Context, field graphql.CollectedField, obj *model.LatestProjects) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LatestProjects",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LatestProjects_stars(ctx context.Context, field graphql.CollectedField, obj *model.LatestProjects) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LatestProjects",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Stars, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LatestProjects_url(ctx context.Context, field graphql.CollectedField, obj *model.LatestProjects) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LatestProjects",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _LatestProjects_description(ctx context.Context, field graphql.CollectedField, obj *model.LatestProjects) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "LatestProjects",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2681,6 +2917,41 @@ func (ec *executionContext) _ProjectEcosystem_updatedAt(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_latestProjects(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().LatestProjects(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.LatestProjects)
+	fc.Result = res
+	return ec.marshalNLatestProjects2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐLatestProjectsᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_names(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -3274,7 +3545,7 @@ func (ec *executionContext) _Secret_createdAt(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Secret_UpdatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Secret) (ret graphql.Marshaler) {
+func (ec *executionContext) _Secret_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Secret) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -5224,6 +5495,53 @@ func (ec *executionContext) _Experience(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var latestProjectsImplementors = []string{"LatestProjects"}
+
+func (ec *executionContext) _LatestProjects(ctx context.Context, sel ast.SelectionSet, obj *model.LatestProjects) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, latestProjectsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LatestProjects")
+		case "id":
+			out.Values[i] = ec._LatestProjects_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._LatestProjects_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "stars":
+			out.Values[i] = ec._LatestProjects_stars(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "url":
+			out.Values[i] = ec._LatestProjects_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._LatestProjects_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -5505,6 +5823,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "latestProjects":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_latestProjects(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "names":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5693,8 +6025,8 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "UpdatedAt":
-			out.Values[i] = ec._Secret_UpdatedAt(ctx, field, obj)
+		case "updatedAt":
+			out.Values[i] = ec._Secret_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -6204,6 +6536,53 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNLatestProjects2ᚕᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐLatestProjectsᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.LatestProjects) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLatestProjects2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐLatestProjects(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNLatestProjects2ᚖgithubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐLatestProjects(ctx context.Context, sel ast.SelectionSet, v *model.LatestProjects) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._LatestProjects(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNName2githubᚗcomᚋveritemᚋapiᚋpkgᚋgraphᚋmodelᚐName(ctx context.Context, sel ast.SelectionSet, v model.Name) graphql.Marshaler {

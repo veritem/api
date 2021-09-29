@@ -44,6 +44,14 @@ type Experience struct {
 	UpdatedAt string   `json:"UpdatedAt"`
 }
 
+type LatestProjects struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Stars       int    `json:"stars"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+}
+
 type Name struct {
 	First    string `json:"first"`
 	Middle   string `json:"middle"`
@@ -96,7 +104,7 @@ type Secret struct {
 	Token     string `json:"token"`
 	ExpiresIn string `json:"expiresIn"`
 	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"UpdatedAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 type Skill struct {

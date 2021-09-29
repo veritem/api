@@ -8,7 +8,7 @@ import (
 	"github.com/veritem/api/pkg/utils"
 )
 
-var query struct {
+var cquery struct {
 	Viewer struct {
 		ContributionsCollection struct {
 			TotalCommitContributions      githubv4.Int
@@ -33,17 +33,17 @@ var query struct {
 }
 
 func Contributions() *model.OpenSource {
-	err := Client().Query(Ctx, &query, nil)
+	err := Client().Query(Ctx, &cquery, nil)
 
 	if err != nil {
 		return &model.OpenSource{}
 	}
 
 	return &model.OpenSource{
-		OpenedPr:                int(query.Viewer.PullRequests.TotalCount),
-		IssuesSubmitted:         int(query.Viewer.Issues.TotalCount),
-		Repositories:            int(query.Viewer.Repositories.TotalCount),
-		RepositoriesContributed: int(query.Viewer.RepositoriesContributedTo.TotalCount),
-		Started:                 utils.FormatTime(query.Viewer.ContributionsCollection.StartedAt),
+		OpenedPr:                int(cquery.Viewer.PullRequests.TotalCount),
+		IssuesSubmitted:         int(cquery.Viewer.Issues.TotalCount),
+		Repositories:            int(cquery.Viewer.Repositories.TotalCount),
+		RepositoriesContributed: int(cquery.Viewer.RepositoriesContributedTo.TotalCount),
+		Started:                 utils.FormatTime(cquery.Viewer.ContributionsCollection.StartedAt),
 	}
 }

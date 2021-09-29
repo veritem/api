@@ -79,7 +79,7 @@ type Secret {
   token: String!
   expiresIn: String!
   createdAt: String!
-  UpdatedAt: String!
+  updatedAt: String!
 }
 
 enum Role {
@@ -112,6 +112,14 @@ type OpenSource {
   commitContributions: String!
 }
 
+type LatestProjects {
+  id: ID!
+  name: String!
+  stars: Int!
+  url: String!
+  description: String!
+}
+
 type Experience {
   id: ID!
   name: String!
@@ -139,6 +147,7 @@ type Mutation {
 }
 
 type Query {
+  latestProjects: [LatestProjects!]!
   names: Name!
   status: String!
   blogs: [Blog!]

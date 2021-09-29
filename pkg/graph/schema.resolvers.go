@@ -119,6 +119,7 @@ func (r *mutationResolver) CreateExperience(ctx context.Context, input model.Cre
 	}, nil
 }
 
+//nolint:gocritic,nolintlint
 func (r *mutationResolver) CreateProject(ctx context.Context, input model.CreateProjectInput) (*model.Project, error) {
 	var projectEcosystem db.ProjectEcosystem
 
@@ -169,6 +170,10 @@ func (r *mutationResolver) CreateProjectEcosystem(ctx context.Context, input mod
 		CreatedAt: utils.FormatTime(ecosystem.CreatedAt),
 		UpdatedAt: utils.FormatTime(ecosystem.UpdatedAt),
 	}, nil
+}
+
+func (r *queryResolver) LatestProjects(ctx context.Context) ([]*model.LatestProjects, error) {
+	return github.LatestProjects(), nil
 }
 
 func (r *queryResolver) Names(ctx context.Context) (*model.Name, error) {
@@ -340,7 +345,10 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+//nolint:gocritic,nolintlint
 type mutationResolver struct{ *Resolver }
+
+//nolint:gocritic,nolintlint
 type queryResolver struct{ *Resolver }
 
 // !!! WARNING !!!
